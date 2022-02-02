@@ -1,0 +1,33 @@
+.rect {
+  border: rgba(0, 0, 0, 0.25) solid 0.25px;
+  background-color: rgba(128, 128, 128, 0.25);
+}
+
+.rect:hover {
+  border: rgb(116, 116, 116, 0.25) solid 0.25px;
+}
+
+.rect-selected {
+  border: rgb(255, 0, 0, 0.5) solid 0.5px;
+  box-sizing: content-box;
+}
+
+.rect-selected:hover {
+  border: rgb(255, 0, 0, 0.5) solid 0.5px;
+}
+
+.react-draggable-dragging {
+  box-shadow: 5px 5px 5px rgb(61, 61, 61);
+}
+
+.preview-lane-line {
+  stroke: rgb(255, 0, 0);
+  stroke-width: 1px;
+}
+
+.preview-slot-rect {
+  fill: rgba(255, 255, 255, 0.1);
+  stroke: rgb(0, 0, 255);
+  stroke-width: 1;
+  stroke-opacity: 0.9;
+}

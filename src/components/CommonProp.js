@@ -1,0 +1,84 @@
+import React, { Fragment, useState, useEffect } from "react";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import { useSelector, useDispatch } from "react-redux";
+
+import { update } from "./../reducers/map-management";
+
+import "./PropertyEditor.css";
+
+export default function CommonProp(props) {
+  let zone = props.selecting;
+
+  const dispatch = useDispatch();
+  // const [x, setX] = useState(zone?.x);
+
+  function updateProp(value, propName) {
+    if (zone == null) return;
+    if (!value || value === "") value = 0;
+    // console.log(value);
+    const currentZone = { ...zone };
+    currentZone[propName] = parseFloat(value);
+    dispatch(update(currentZone));
+  }
+
+  function updatePropString(value, propName) {
+    // console.log(value);
+    const currentZone = { ...zone };
+    currentZone[propName] = value;
+    dispatch(update(currentZone));
+  }
+
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12} sm={12} textAlign={"start"}>
+        <h3>Geometry Property</h3>
+      </Grid>
+      <Grid item xs={12} sm={12}>
+        <TextField
+          label="Name"
+          fullWidth
+          size="small"
+          value={zone.name}
+          onChange={(e) => updatePropString(e.target.value, "name")}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="X"
+          fullWidth
+          size="small"
+          value={zone.x}
+          onChange={(e) => updateProp(e.target.value, "x")}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="Y"
+          fullWidth
+          size="small"
+          value={zone.y}
+          onChange={(e) => updateProp(e.target.value, "y")}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="Width"
+          fullWidth
+          size="small"
+          value={zone.width}
+          onChange={(e) => updateProp(e.target.value, "width")}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="Height"
+          fullWidth
+          size="small"
+          value={zone.height}
+          onChange={(e) => updateProp(e.target.value, "height")}
+        />
+      </Grid>
+    </Grid>
+  );
+}

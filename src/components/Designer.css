@@ -1,0 +1,15 @@
+.content {
+  border: rgb(3, 3, 3) solid 2px;
+  background-color: rgb(255, 255, 255);
+}
+
+.wrapper {
+  width: 75vw;
+  height: 100vh;
+  background-color: gray;
+}
+
+.map-name {
+  position: absolute;
+  left: 35px;
+}
