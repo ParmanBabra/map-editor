@@ -73,7 +73,7 @@ export default function MapProp(props) {
     if (!value || value === "") value = 0;
     const current = { ...defaultValus };
     current[propName] = parseInt(value);
-    dispatch(updateMap(current));
+    dispatch(updateDefault(current));
   }
 
   return (

@@ -7,7 +7,10 @@ import PropertyEditor from "./components/PropertyEditor";
 
 function App() {
   return (
-    <div className="App">
+    <div
+      className="App"
+      
+    >
       <Designer />
       <PropertyEditor />
     </div>

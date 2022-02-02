@@ -30,6 +30,7 @@ import ExportDialog from "./ExportDialog";
 export default function Designer(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const map = useSelector((state) => state.mapManagement.map);
+  const selections = useSelector((state) => state.selection.selections);
   const [zoomInformation, setZoomInformation] = useState({
     scale: 1,
   });
@@ -69,7 +70,10 @@ export default function Designer(props) {
   };
 
   return (
-    <div id="map">
+    <div
+      id="map"
+      
+    >
       <TransformWrapper
         panning={{ excluded: ["rect", "item-area"] }}
         minScale={0.2}

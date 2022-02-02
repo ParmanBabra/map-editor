@@ -14,10 +14,14 @@ export const selectionSlice = createSlice({
     selectMap: (state, action) => {
       state.isMap = true;
     },
+    clear: (state, action) => {
+      state.selections = [];
+      state.isMap = false;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { select, selectMap } = selectionSlice.actions;
+export const { select, selectMap, clear } = selectionSlice.actions;
 
 export default selectionSlice.reducer;

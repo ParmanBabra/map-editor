@@ -3,8 +3,8 @@ import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
 
-import { update } from "./../reducers/map-management";
-import { select } from "./../reducers/selection";
+import { update, deleteZone } from "./../reducers/map-management";
+import { select, clear } from "./../reducers/selection";
 
 import "./Zone.css";
 
@@ -95,7 +95,11 @@ export default function Zone(props) {
     let slots = [];
     if (zone.laneDirection === "Vertical") {
       for (let i = 0; i <= zone.width - zone.laneWidth; i += zone.laneWidth) {
-        for (let j = 0; j <= zone.height - zone.slotWidth; j += zone.slotWidth) {
+        for (
+          let j = 0;
+          j <= zone.height - zone.slotWidth;
+          j += zone.slotWidth
+        ) {
           slots.push({
             x: i + 0.25,
             y: j + 0.25,
@@ -160,6 +164,13 @@ export default function Zone(props) {
     }
   }
 
+  function handleKeyDown(e) {
+    if (e.code === "Delete") {
+      dispatch(deleteZone(currentZoneId));
+      dispatch(clear());
+    }
+  }
+
   useEffect(() => {
     radRef.current.updatePosition({ x: zone.x, y: zone.y });
   });
@@ -171,6 +182,8 @@ export default function Zone(props) {
 
   return (
     <Rnd
+      tabIndex={currentZoneId === zone.id ? 0 : 1}
+      onKeyDown={handleKeyDown}
       className={classStyle}
       bounds=".content"
       dragGrid={map.snapGrid}
@@ -209,7 +222,9 @@ export default function Zone(props) {
         {renderSlot(map, rectSlot)}
         {renderLane(map, lineLane)}
 
-        <text x="10" y="20" className="small">Zone : {zone.name}</text>
+        <text x="10" y="20" className="small">
+          Zone : {zone.name}
+        </text>
       </svg>
     </Rnd>
   );

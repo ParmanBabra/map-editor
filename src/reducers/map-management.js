@@ -149,6 +149,10 @@ export const mapManagementSlice = createSlice({
       };
       state.zones[id] = zone;
     },
+    deleteZone: (state, action) => {
+      let zoneId = action.payload;
+      delete state.zones[zoneId];
+    },
     updateMap: (state, action) => {
       state.map = action.payload;
     },
@@ -193,6 +197,7 @@ export const mapManagementSlice = createSlice({
 export const {
   update,
   add,
+  deleteZone,
   updateMap,
   updateDefault,
   saveLocal,
