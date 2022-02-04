@@ -1,6 +1,7 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { useDispatch } from "react-redux";
 
 import { updateZone } from "./../reducers/map-management";
@@ -31,10 +32,12 @@ export default function CommonProp(props) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={12} textAlign={"start"}>
-        <h3>Geometry Property</h3>
+      <Grid item sm={12} textAlign={"start"}>
+        <Typography variant="h5" component="h5">
+          Geometry Property
+        </Typography>
       </Grid>
-      <Grid item xs={12} sm={12}>
+      <Grid item sm={12}>
         <TextField
           label="Name"
           fullWidth

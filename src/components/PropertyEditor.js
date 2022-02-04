@@ -4,6 +4,8 @@ import TextField from "@mui/material/TextField";
 import { useSelector, useDispatch } from "react-redux";
 
 import { update } from "./../reducers/map-management";
+import Paper from "@mui/material/Paper";
+import Slide from "@mui/material/Slide";
 
 import CommonProp from "./CommonProp";
 import MapProp from "./MapProp";
@@ -28,8 +30,12 @@ export default function PropertyEditor(props) {
 
   if (isMap) {
     return (
-      <div className="tools">
-        <MapProp map={map} defaultValus={defaultValues} />
+      <div className="editor">
+        <Slide direction="left" in={true} mountOnEnter unmountOnExit>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <MapProp map={map} defaultValus={defaultValues} />
+          </Paper>
+        </Slide>
       </div>
     );
   }
@@ -45,9 +51,13 @@ export default function PropertyEditor(props) {
   }
 
   return (
-    <div className="tools">
-      <CommonProp selecting={zone} />
-      {renderProps(zone)}
+    <div className="editor">
+      <Slide direction="left" in={true} mountOnEnter unmountOnExit>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <CommonProp selecting={zone} />
+          {renderProps(zone)}
+        </Paper>
+      </Slide>
     </div>
   );
 }

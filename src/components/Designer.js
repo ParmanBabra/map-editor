@@ -7,26 +7,12 @@ import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AddIcon from "@mui/icons-material/Add";
-import MapSharpIcon from "@mui/icons-material/MapSharp";
-import SaveIcon from "@mui/icons-material/Save";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
-
-import {
-  saveLocal,
-  loadLocal,
-  saveJson,
-  exportSql,
-} from "./../reducers/map-management";
-import { selectMap } from "./../reducers/selection";
 
 import Grid from "./Grid";
 import "./Designer.css";
 import Zone from "./Zone";
 import Lane from "./Lane";
 import Slot from "./Slot";
-import LoadLocalDialog from "./LoadLocalDialog";
-import ExportDialog from "./ExportDialog";
 
 export default function Designer(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
@@ -36,10 +22,6 @@ export default function Designer(props) {
   const [zoomInformation, setZoomInformation] = useState({
     scale: 1,
   });
-
-  const [openLoad, setOpenLoad] = useState(false);
-  const [openExport, setOpenExport] = useState(false);
-  const [exportSQLs, setExportSQLs] = useState([]);
 
   const dispatch = useDispatch();
   const mapSize = map.size;
@@ -54,23 +36,6 @@ export default function Designer(props) {
     }
   }
 
-  const handleClickOpen = () => {
-    setOpenLoad(true);
-  };
-
-  const handleClose = (value) => {
-    setOpenLoad(false);
-    if (!value) return;
-
-    dispatch(loadLocal(value));
-  };
-
-  const handleClickExport = async () => {
-    let sqls = await dispatch(exportSql());
-    setOpenExport(true);
-    setExportSQLs(sqls.payload);
-  };
-
   return (
     <div id="map">
       <TransformWrapper
@@ -78,6 +43,7 @@ export default function Designer(props) {
         minScale={0.2}
         maxScale={8}
         centerZoomedOut={true}
+        centerOnInit={true}
         onZoomStop={(e) => {
           setZoomInformation({
             scale: e.state.scale,
@@ -134,43 +100,11 @@ export default function Designer(props) {
         icon={<SettingsIcon />}
       >
         <SpeedDialAction
-          icon={<PlaylistAddCheckIcon />}
-          tooltipTitle="Export"
-          onClick={(e) => handleClickExport()}
-        />
-        <SpeedDialAction
-          icon={<SaveIcon />}
-          tooltipTitle="Save"
-          onClick={(e) => dispatch(saveLocal())}
-        />
-        <SpeedDialAction
-          icon={<SaveIcon />}
-          tooltipTitle="Save Json"
-          onClick={(e) => dispatch(saveJson())}
-        />
-        <SpeedDialAction
-          icon={<FileUploadIcon />}
-          tooltipTitle="Load"
-          onClick={(e) => handleClickOpen()}
-        />
-        <SpeedDialAction
-          icon={<MapSharpIcon />}
-          tooltipTitle="Map Infomation"
-          onClick={(e) => dispatch(selectMap())}
-        />
-        <SpeedDialAction
           icon={<AddIcon />}
           tooltipTitle="Add Zone"
           onClick={(e) => addZone()}
         />
       </SpeedDial>
-
-      <LoadLocalDialog open={openLoad} onClose={handleClose} />
-      <ExportDialog
-        open={openExport}
-        onClose={() => setOpenExport(false)}
-        exportSQLs={exportSQLs}
-      />
     </div>
   );
 }

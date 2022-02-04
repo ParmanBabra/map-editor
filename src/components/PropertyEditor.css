@@ -1,5 +1,6 @@
-.tools {
-  background-color: gray;
-  padding: 20px;
-  overflow: auto;
+.editor {
+  position: fixed;
+  right: 10px;
+  top: 90px;
+  max-width: 350px;
 }

@@ -195,6 +195,7 @@ export const mapManagementSlice = createSlice({
 
       localStorage(keyList, mapList);
       localStorage(saveKey, data);
+      console.log("saveLocal");
     },
 
     loadLocal: (state, action) => {

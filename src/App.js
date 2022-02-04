@@ -1,6 +1,8 @@
 import "./App.css";
 
+
 import Designer from "./components/Designer";
+import ToolsBar from "./components/ToolsBar";
 import PropertyEditor from "./components/PropertyEditor";
 
 function App() {
@@ -8,6 +10,7 @@ function App() {
     <div
       className="App"
     >
+      <ToolsBar />
       <Designer />
       <PropertyEditor />
     </div>

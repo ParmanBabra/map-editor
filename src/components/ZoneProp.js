@@ -9,6 +9,7 @@ import FormControl from "@mui/material/FormControl";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 import { updateZone, generateByZone } from "./../reducers/map-management";
 
@@ -44,10 +45,12 @@ export default function ZoneProp(props) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={12} textAlign={"start"}>
-        <h3>Zone Property</h3>
+      <Grid item sm={12} textAlign={"start"}>
+        <Typography variant="h5" component="h5">
+          Zone Property
+        </Typography>
       </Grid>
-      <Grid item xs={12} sm={12}>
+      <Grid item sm={12}>
         <FormControl fullWidth>
           <InputLabel>Lane Direction</InputLabel>
           <Select
