@@ -5,7 +5,7 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
   let sqlZones = [];
   let sqlLanes = [];
   let sqlSlots = [];
-  let { width, height } = map.size;
+  let { height } = map.size;
 
   console.log(template_zones);
 

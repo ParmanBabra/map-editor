@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, Fragment } from "react";
+import React, { useEffect, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";

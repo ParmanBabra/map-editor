@@ -13,7 +13,6 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 import {
-  addZone,
   saveLocal,
   loadLocal,
   saveJson,
@@ -34,7 +33,6 @@ export default function Designer(props) {
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
   const map = useSelector((state) => state.mapManagement.map);
-  const selections = useSelector((state) => state.selection.selections);
   const [zoomInformation, setZoomInformation] = useState({
     scale: 1,
   });
@@ -115,7 +113,7 @@ export default function Designer(props) {
               ></Lane>
             );
           })}
-          
+
           {_.map(slots, (slot) => {
             return (
               <Slot
