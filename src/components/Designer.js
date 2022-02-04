@@ -13,7 +13,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 import {
-  add,
+  addZone,
   saveLocal,
   loadLocal,
   saveJson,
@@ -24,11 +24,15 @@ import { selectMap } from "./../reducers/selection";
 import Grid from "./Grid";
 import "./Designer.css";
 import Zone from "./Zone";
+import Lane from "./Lane";
+import Slot from "./Slot";
 import LoadLocalDialog from "./LoadLocalDialog";
 import ExportDialog from "./ExportDialog";
 
 export default function Designer(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
+  const lanes = useSelector((state) => state.mapManagement.lanes);
+  const slots = useSelector((state) => state.mapManagement.slots);
   const map = useSelector((state) => state.mapManagement.map);
   const selections = useSelector((state) => state.selection.selections);
   const [zoomInformation, setZoomInformation] = useState({
@@ -43,7 +47,7 @@ export default function Designer(props) {
   const mapSize = map.size;
 
   function addZone() {
-    dispatch(add());
+    dispatch(addZone());
   }
 
   function renderGrid() {
@@ -70,10 +74,7 @@ export default function Designer(props) {
   };
 
   return (
-    <div
-      id="map"
-      
-    >
+    <div id="map">
       <TransformWrapper
         panning={{ excluded: ["rect", "item-area"] }}
         minScale={0.2}
@@ -102,6 +103,26 @@ export default function Designer(props) {
                 zone={zone}
                 scale={zoomInformation.scale}
               ></Zone>
+            );
+          })}
+
+          {_.map(lanes, (lane) => {
+            return (
+              <Lane
+                key={lane.key}
+                lane={lane}
+                scale={zoomInformation.scale}
+              ></Lane>
+            );
+          })}
+          
+          {_.map(slots, (slot) => {
+            return (
+              <Slot
+                key={slot.key}
+                slot={slot}
+                scale={zoomInformation.scale}
+              ></Slot>
             );
           })}
 

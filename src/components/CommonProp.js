@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import { useSelector, useDispatch } from "react-redux";
 
-import { update } from "./../reducers/map-management";
+import { updateZone } from "./../reducers/map-management";
 
 import "./PropertyEditor.css";
 
@@ -19,14 +19,14 @@ export default function CommonProp(props) {
     // console.log(value);
     const currentZone = { ...zone };
     currentZone[propName] = parseFloat(value);
-    dispatch(update(currentZone));
+    dispatch(updateZone(currentZone));
   }
 
   function updatePropString(value, propName) {
     // console.log(value);
     const currentZone = { ...zone };
     currentZone[propName] = value;
-    dispatch(update(currentZone));
+    dispatch(updateZone(currentZone));
   }
 
   return (

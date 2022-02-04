@@ -3,7 +3,12 @@ import format from "format";
 import localStorage from "local-storage";
 
 import { downloadFile } from "./../helper/export-file";
-import { exportMapInfo, exportTemplateZone } from "./../helper/export-zone";
+import {
+  exportMapInfo,
+  exportTemplateZone,
+  generateLaneRectFromTemplateZone,
+  generateSlotRectFromTemplateZone,
+} from "./../helper/export-zone";
 
 let keyList = "MAP_LIST";
 let mapList = localStorage(keyList);
@@ -98,6 +103,8 @@ export const mapManagementSlice = createSlice({
         localtionType: "storage",
       },
     },
+    slots: {},
+    lanes: {},
     map: {
       id: "A",
       name: "A",
@@ -126,10 +133,16 @@ export const mapManagementSlice = createSlice({
   },
 
   reducers: {
-    update: (state, action) => {
+    updateZone: (state, action) => {
       state.zones[action.payload.id] = action.payload;
     },
-    add: (state, action) => {
+    updateLane: (state, action) => {
+      state.lanes[action.payload.key] = action.payload;
+    },
+    updateSlot: (state, action) => {
+      state.slots[action.payload.key] = action.payload;
+    },
+    addZone: (state, action) => {
       state.map.zoneRunning++;
       const id = state.map.zoneRunning;
       const zone = {
@@ -152,6 +165,14 @@ export const mapManagementSlice = createSlice({
     deleteZone: (state, action) => {
       let zoneId = action.payload;
       delete state.zones[zoneId];
+    },
+    deleteLane: (state, action) => {
+      let key = action.payload;
+      delete state.lanes[key];
+    },
+    deleteSlot: (state, action) => {
+      let key = action.payload;
+      delete state.slots[key];
     },
     updateMap: (state, action) => {
       state.map = action.payload;
@@ -185,6 +206,43 @@ export const mapManagementSlice = createSlice({
       state.map = data.map;
       state.default = data.default;
     },
+    generateByZone: (state, action) => {
+      let zoneId = action.payload;
+      let zone = state.zones[zoneId];
+
+      let lanes = generateLaneRectFromTemplateZone(zone);
+      let slots = generateSlotRectFromTemplateZone(lanes, zone);
+
+      for (const lane of lanes) {
+        let key = `${lane.zone_id}_${lane.id}`;
+        let name = format(
+          state.default.laneNameFormat,
+          state.map.name,
+          zone.id,
+          lane.id
+        );
+
+        state.lanes[key] = {
+          ...lane,
+          ...{ key, name, type: "lane" },
+        };
+      }
+
+      for (const slot of slots) {
+        let key = `${slot.zone_id}_${slot.lane_id}_${slot.id}`;
+        let name = format(
+          state.default.slotNameFormat,
+          state.map.name,
+          zone.id,
+          slot.lane_id,
+          slot.id
+        );
+        state.slots[key] = {
+          ...slot,
+          ...{ key, name, type: "slot" },
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     // Add reducers for additional action types here, and handle loading state as needed
@@ -195,14 +253,19 @@ export const mapManagementSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-  update,
-  add,
+  updateZone,
+  updateLane,
+  updateSlot,
+  addZone,
   deleteZone,
+  deleteLane,
+  deleteSlot,
   updateMap,
   updateDefault,
   saveLocal,
   loadLocal,
   exportSQL,
+  generateByZone,
 } = mapManagementSlice.actions;
 
 export default mapManagementSlice.reducer;

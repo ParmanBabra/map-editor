@@ -5,8 +5,25 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
   let sqlZones = [];
   let sqlLanes = [];
   let sqlSlots = [];
+  let { width, height } = map.size;
+
+  console.log(template_zones);
+
+  function convertOriginXToBottomLeft(y, height, mapHeight) {
+    let newY = Math.abs(y - mapHeight);
+    let newYBottomLeft = newY - height;
+
+    return [newY, newYBottomLeft];
+  }
+
   for (const key in template_zones) {
     let zone = template_zones[key];
+    let [y, bottomLeftY] = convertOriginXToBottomLeft(
+      zone.y,
+      zone.height,
+      height
+    );
+
     let row = {
       id: zone.id,
       name: zone.name,
@@ -18,9 +35,9 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
       map_id: map.id,
       capacity: zone.capacity,
       geom: {
-        string: `box '((${zone.x}, ${zone.y}),(${zone.x + zone.width}, ${
-          zone.y + zone.height
-        }))'::polygon`,
+        string: `box '((${zone.x}, ${y}),(${
+          zone.x + zone.width
+        }, ${bottomLeftY}))'::polygon`,
       },
       type: zone.localtionType,
       label_location: null,
@@ -43,6 +60,12 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
     let rects = generateLaneRectFromTemplateZone(zone);
 
     for (const rect of rects) {
+      let [y, bottomLeftY] = convertOriginXToBottomLeft(
+        rect.y,
+        rect.height,
+        height
+      );
+
       let row = {
         id: rect.id,
         name: format(defaultValue.laneNameFormat, map.name, zone.id, rect.id),
@@ -52,9 +75,9 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
         updateby: map.updateBy,
         warehouse_id: map.warehouseId,
         bound_box: {
-          string: `box '((${rect.x}, ${rect.y}),(${rect.x + rect.width}, ${
-            rect.y + rect.height
-          }))'`,
+          string: `box '((${rect.x}, ${y}),(${
+            rect.x + rect.width
+          }, ${bottomLeftY}))'`,
         },
         zone_id: zone.id,
         capacity_count: 0,
@@ -75,6 +98,12 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
 
     // index = 1;
     for (const rect of rects) {
+      let [y, bottomLeftY] = convertOriginXToBottomLeft(
+        rect.y,
+        rect.height,
+        height
+      );
+
       let row = {
         id: rect.id,
         name: format(
@@ -91,9 +120,9 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
         updateby: map.updateBy,
         warehouse_id: map.warehouseId,
         bound_box: {
-          string: `box '((${rect.x}, ${rect.y}),(${rect.x + rect.width}, ${
-            rect.y + rect.height
-          }))'`,
+          string: `box '((${rect.x}, ${y}),(${
+            rect.x + rect.width
+          }, ${bottomLeftY}))'`,
         },
         lane_id: rect.lane_id,
         zone_id: zone.id,
@@ -183,7 +212,7 @@ export const generateSlotRectFromTemplateZone = (lanes, zone) => {
           id: index,
           lane_id: lane.id,
           zone_id: zone.id,
-          x: zone.x + lane.x + 0.25,
+          x: lane.x + 0.25,
           y: zone.y + i + 0.25,
           width: zone.laneWidth - 0.5,
           height: zone.slotWidth - 0.5,
@@ -198,7 +227,7 @@ export const generateSlotRectFromTemplateZone = (lanes, zone) => {
           lane_id: lane.id,
           zone_id: zone.id,
           x: zone.x + i + 0.25,
-          y: zone.y + lane.y + 0.25,
+          y: lane.y + 0.25,
           width: zone.slotWidth - 0.5,
           height: zone.laneWidth - 0.5,
         });

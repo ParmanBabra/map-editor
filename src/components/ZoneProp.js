@@ -10,7 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Button from "@mui/material/Button";
 
-import { update } from "./../reducers/map-management";
+import { updateZone, generateByZone } from "./../reducers/map-management";
 
 import "./PropertyEditor.css";
 
@@ -25,7 +25,7 @@ export default function ZoneProp(props) {
     if (!value || value === "") value = 0;
     const currentZone = { ...zone };
     currentZone[propName] = parseInt(value);
-    dispatch(update(currentZone));
+    dispatch(updateZone(currentZone));
   }
 
   function updateStringProp(value, propName) {
@@ -33,13 +33,13 @@ export default function ZoneProp(props) {
     if (!value || value === "") value = 0;
     const currentZone = { ...zone };
     currentZone[propName] = value;
-    dispatch(update(currentZone));
+    dispatch(updateZone(currentZone));
   }
 
   function updatePropBoolean(value, propName) {
     const currentZone = { ...zone };
     currentZone[propName] = Boolean(value);
-    dispatch(update(currentZone));
+    dispatch(updateZone(currentZone));
   }
 
   return (
@@ -103,7 +103,12 @@ export default function ZoneProp(props) {
         />
       </Grid>
       <Grid item xs={12} sm={6}>
-        <Button variant="contained">Genarate</Button>
+        <Button
+          variant="contained"
+          onClick={() => dispatch(generateByZone(zone.id))}
+        >
+          Genarate
+        </Button>
       </Grid>
     </Grid>
   );

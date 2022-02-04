@@ -8,7 +8,16 @@ export const selectionSlice = createSlice({
   },
   reducers: {
     select: (state, action) => {
-      state.selections = [{ id: action.payload.id, type: action.payload.type }];
+      if (action.payload.key) {
+        state.selections = [
+          { id: action.payload.key, type: action.payload.type },
+        ];
+      } else {
+        state.selections = [
+          { id: action.payload.id, type: action.payload.type },
+        ];
+      }
+
       state.isMap = false;
     },
     selectMap: (state, action) => {

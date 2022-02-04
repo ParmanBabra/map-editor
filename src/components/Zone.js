@@ -3,7 +3,7 @@ import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
 
-import { update, deleteZone } from "./../reducers/map-management";
+import { updateZone, deleteZone } from "./../reducers/map-management";
 import { select, clear } from "./../reducers/selection";
 
 import "./Zone.css";
@@ -45,7 +45,7 @@ export default function Zone(props) {
     zone.y = y;
 
     dispatch(select(zone));
-    dispatch(update(zone));
+    dispatch(updateZone(zone));
 
     return { x, y };
   }
@@ -60,7 +60,7 @@ export default function Zone(props) {
     zone.y = y;
 
     dispatch(select(zone));
-    dispatch(update(zone));
+    dispatch(updateZone(zone));
 
     return { x, y };
   }
