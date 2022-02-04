@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Typography from "@mui/material/Typography";
 import { useDispatch } from "react-redux";
 
 import { updateMap, updateDefault } from "./../reducers/map-management";
@@ -79,10 +80,12 @@ export default function MapProp(props) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} textAlign={"start"}>
-        <h3>Map Property</h3>
+        <Typography variant="h5" component="h5">
+          Map Property
+        </Typography>
       </Grid>
-     
-      <Grid item xs={12} sm={12}>
+
+      <Grid i tem xs={12} sm={12}>
         <TextField
           label="Map Name"
           fullWidth
@@ -183,11 +186,11 @@ export default function MapProp(props) {
           label="Show Slot"
         />
       </Grid>
-      <Grid item xs={12} sm={6} textAlign={"start"}></Grid>
-      <Grid item xs={12} sm={6} textAlign={"start"}></Grid>
 
       <Grid item xs={12} sm={12} textAlign={"start"}>
-        <h3>Default Valus</h3>
+        <Typography variant="h5" component="h5">
+          Default Valus
+        </Typography>
       </Grid>
       <Grid item xs={12} sm={12}>
         <TextField
