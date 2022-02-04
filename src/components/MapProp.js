@@ -85,7 +85,7 @@ export default function MapProp(props) {
         </Typography>
       </Grid>
 
-      <Grid i tem xs={12} sm={12}>
+      <Grid item xs={12} sm={12}>
         <TextField
           label="Map Name"
           fullWidth
