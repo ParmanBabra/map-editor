@@ -164,13 +164,6 @@ export default function Zone(props) {
     }
   }
 
-  function handleKeyDown(e) {
-    if (e.code === "Delete") {
-      dispatch(deleteZone(currentZoneId));
-      dispatch(clear());
-    }
-  }
-
   useEffect(() => {
     radRef.current.updatePosition({ x: zone.x, y: zone.y });
   });
@@ -178,12 +171,8 @@ export default function Zone(props) {
   const lineLane = createLineLanes();
   const rectSlot = createSlotRect();
 
-  //   radRef.current.updatePosition({ x: zone.x, y: zone.y });
-
   return (
     <Rnd
-      tabIndex={currentZoneId === zone.id ? 0 : 1}
-      onKeyDown={handleKeyDown}
       className={classStyle}
       bounds=".content"
       dragGrid={map.snapGrid}

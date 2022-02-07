@@ -1,12 +1,10 @@
-import React, { useState, Fragment } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
@@ -106,7 +104,7 @@ export default function ToolsBar(props) {
               <Divider light />
               <MenuItem
                 onClick={(e) => {
-                  handleCloseNavMap();
+                  handleCloseNavFile();
                   dispatch(saveLocal());
                 }}
               >
@@ -114,7 +112,7 @@ export default function ToolsBar(props) {
               </MenuItem>
               <MenuItem
                 onClick={(e) => {
-                  handleCloseNavMap();
+                  handleCloseNavFile();
                   dispatch(saveJson());
                 }}
               >

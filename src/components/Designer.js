@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import _ from "lodash";
 import { useSelector, useDispatch } from "react-redux";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -7,6 +7,9 @@ import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AddIcon from "@mui/icons-material/Add";
+
+import { addZone, deleteZones } from "./../reducers/map-management";
+import { clear } from "./../reducers/selection";
 
 import Grid from "./Grid";
 import "./Designer.css";
@@ -19,14 +22,20 @@ export default function Designer(props) {
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
   const map = useSelector((state) => state.mapManagement.map);
+  const keys = useSelector((state) => state.keyboard.keys);
+  const mouse = useSelector((state) => state.keyboard.mouse);
+  const selections = useSelector((state) => state.selection.selections);
+
   const [zoomInformation, setZoomInformation] = useState({
     scale: 1,
   });
 
+  const [canPanning, setCanPanning] = useState(true);
+
   const dispatch = useDispatch();
   const mapSize = map.size;
 
-  function addZone() {
+  function handleAddZone() {
     dispatch(addZone());
   }
 
@@ -36,10 +45,29 @@ export default function Designer(props) {
     }
   }
 
+  useEffect(() => {
+    if (keys["Delete"]) {
+      if (selections.length > 0) {
+        let zones = selections.map((x) => x.id);
+        dispatch(deleteZones(zones));
+        dispatch(clear());
+      }
+    }
+
+    if (mouse[4]) {
+      setCanPanning(false);
+    }
+    else {
+      setCanPanning(true);
+    }
+  });
+
+  console.log(canPanning);
+
   return (
     <div id="map">
       <TransformWrapper
-        panning={{ excluded: ["rect", "item-area"] }}
+        panning={{ excluded: ["rect", "item-area"], disabled: canPanning }}
         minScale={0.2}
         maxScale={8}
         centerZoomedOut={true}
@@ -58,6 +86,10 @@ export default function Designer(props) {
             height: `${mapSize.height}px`,
           }}
         >
+          <div
+            style={{ width: "100%", height: "100%", position: "absolute" }}
+            onClick={(e) => dispatch(clear())}
+          ></div>
           {renderGrid()}
 
           {_.map(zones, (zone) => {
@@ -102,7 +134,7 @@ export default function Designer(props) {
         <SpeedDialAction
           icon={<AddIcon />}
           tooltipTitle="Add Zone"
-          onClick={(e) => addZone()}
+          onClick={(e) => handleAddZone()}
         />
       </SpeedDial>
     </div>

@@ -6,7 +6,7 @@ import "./Grid.css";
 export default function Grid({ map }) {
   const vLine = [];
   const hLine = [];
-  let counting = 1;
+  let counting = 0;
 
   for (var i = 0; i < map.size.height; i += map.snapGrid[0]) {
     if (counting % 5 === 0) {
@@ -30,7 +30,7 @@ export default function Grid({ map }) {
     counting++;
   }
 
-  counting = 1;
+  counting = 0;
   for (var i = 0; i < map.size.width; i += map.snapGrid[1]) {
     if (counting % 5 === 0) {
       hLine.push({

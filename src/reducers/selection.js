@@ -20,6 +20,7 @@ export const selectionSlice = createSlice({
 
       state.isMap = false;
     },
+    
     selectMap: (state, action) => {
       state.isMap = true;
     },

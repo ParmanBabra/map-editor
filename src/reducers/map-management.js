@@ -59,7 +59,7 @@ export const mapManagementSlice = createSlice({
     zones: {
       1: {
         id: "1",
-        name: "1",
+        name: "A1",
         type: "zone",
         x: 0,
         y: 0,
@@ -74,7 +74,7 @@ export const mapManagementSlice = createSlice({
       },
       2: {
         id: "2",
-        name: "2",
+        name: "A2",
         type: "zone",
         x: 0,
         y: 0,
@@ -89,7 +89,7 @@ export const mapManagementSlice = createSlice({
       },
       3: {
         id: "3",
-        name: "3",
+        name: "A3",
         type: "zone",
         x: 0,
         y: 0,
@@ -165,6 +165,13 @@ export const mapManagementSlice = createSlice({
     deleteZone: (state, action) => {
       let zoneId = action.payload;
       delete state.zones[zoneId];
+    },
+    deleteZones: (state, action) => {
+      let zoneIds = action.payload;
+
+      for (const zoneId of zoneIds) {
+        delete state.zones[zoneId];
+      }
     },
     deleteLane: (state, action) => {
       let key = action.payload;
@@ -259,6 +266,7 @@ export const {
   updateSlot,
   addZone,
   deleteZone,
+  deleteZones,
   deleteLane,
   deleteSlot,
   updateMap,

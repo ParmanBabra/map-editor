@@ -5,7 +5,7 @@
 
 .wrapper {
   width: 100vw;
-  min-height: calc(100vh - 70px);
+  height: calc(100vh - 70px);
   background-color: gray;
 }
 
