@@ -1,8 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import format from "format";
 import localStorage from "local-storage";
+import { v4 as uuidv4 } from "uuid";
+import _ from "lodash";
 
 import { downloadFile } from "./../helper/export-file";
+import { collisionBox } from "./../helper/detect-collision";
 import {
   exportMapInfo,
   exportTemplateZone,
@@ -58,7 +61,8 @@ export const mapManagementSlice = createSlice({
   initialState: {
     zones: {
       1: {
-        id: "1",
+        key: 1,
+        id: 1,
         name: "A1",
         type: "zone",
         x: 0,
@@ -73,7 +77,8 @@ export const mapManagementSlice = createSlice({
         localtionType: "storage",
       },
       2: {
-        id: "2",
+        key: 2,
+        id: 2,
         name: "A2",
         type: "zone",
         x: 0,
@@ -88,7 +93,8 @@ export const mapManagementSlice = createSlice({
         localtionType: "storage",
       },
       3: {
-        id: "3",
+        key: 3,
+        id: 3,
         name: "A3",
         type: "zone",
         x: 0,
@@ -118,6 +124,9 @@ export const mapManagementSlice = createSlice({
       showGrid: true,
       showLane: true,
       showSlot: true,
+      freezingZone: false,
+      freezingLane: true,
+      freezingSlot: true,
       updateBy: "nakarsat",
     },
 
@@ -142,10 +151,44 @@ export const mapManagementSlice = createSlice({
     updateSlot: (state, action) => {
       state.slots[action.payload.key] = action.payload;
     },
+    updateZoneOfLane: (state, action) => {
+      let lane = state.lanes[action.payload];
+
+      let zones = _.values(state.zones);
+      zones = collisionBox(lane, zones);
+
+      if (zones.length > 0) {
+        let zone = zones[0];
+        lane.zone_id = zone.id;
+
+        let lanesInZone = _.values(state.lanes).filter(
+          (x) => zone.id === x.zone_id
+        );
+
+        if (zone.laneDirection === "Vertical") {
+          lanesInZone = _.orderBy(lanesInZone, ["x"], ["asc"]);
+        } else {
+          lanesInZone = _.orderBy(lanesInZone, ["y"], ["asc"]);
+        }
+
+        let index = 1;
+        for (const lane of lanesInZone) {
+          lane.id = index;
+          lane.name = format(
+            state.default.laneNameFormat,
+            state.map.name,
+            lane.zone_id,
+            lane.id
+          );
+          index++;
+        }
+      }
+    },
     addZone: (state, action) => {
       state.map.zoneRunning++;
       const id = state.map.zoneRunning;
       const zone = {
+        key: id,
         id: id,
         name: format(state.default.zoneNameFormat, state.map.name, id),
         type: "zone",
@@ -162,9 +205,44 @@ export const mapManagementSlice = createSlice({
       };
       state.zones[id] = zone;
     },
-    deleteZone: (state, action) => {
-      let zoneId = action.payload;
-      delete state.zones[zoneId];
+    addLane: (state, action) => {
+      const lane = {
+        key: uuidv4(),
+        id: null,
+        name: format(state.default.laneNameFormat, state.map.name, 0, 0),
+        zone_id: null,
+        x: 0,
+        y: 0,
+        width: 50,
+        height: 200,
+        slotWidth: state.default.slotWidth,
+        autoAdjustZone: true,
+        autoGenerate: false,
+        capacity: 0,
+        localtionType: "storage",
+        type: "lane",
+      };
+
+      state.lanes[lane.key] = lane;
+
+      // const id = state.map.zoneRunning;
+      // const lane = {
+      //   key: id,
+      //   id: id,
+      //   name: format(state.default.zoneNameFormat, state.map.name, id),
+      //   type: "zone",
+      //   x: 0,
+      //   y: 0,
+      //   width: 320,
+      //   height: 200,
+      //   laneDirection: "Vertical",
+      //   laneWidth: state.default.laneWidth,
+      //   slotWidth: state.default.slotWidth,
+      //   autoGenerate: false,
+      //   capacity: 0,
+      //   localtionType: "storage",
+      // };
+      // state.zones[id] = zone;
     },
     deleteZones: (state, action) => {
       let zoneIds = action.payload;
@@ -173,13 +251,19 @@ export const mapManagementSlice = createSlice({
         delete state.zones[zoneId];
       }
     },
-    deleteLane: (state, action) => {
-      let key = action.payload;
-      delete state.lanes[key];
+    deleteLanes: (state, action) => {
+      let lanes = action.payload;
+
+      for (const lane of lanes) {
+        delete state.lanes[lane];
+      }
     },
-    deleteSlot: (state, action) => {
-      let key = action.payload;
-      delete state.slots[key];
+    deleteSlots: (state, action) => {
+      let slots = action.payload;
+
+      for (const slot of slots) {
+        delete state.slots[slot];
+      }
     },
     updateMap: (state, action) => {
       state.map = action.payload;
@@ -265,16 +349,17 @@ export const {
   updateLane,
   updateSlot,
   addZone,
-  deleteZone,
+  addLane,
   deleteZones,
-  deleteLane,
-  deleteSlot,
+  deleteLanes,
+  deleteSlots,
   updateMap,
   updateDefault,
   saveLocal,
   loadLocal,
   exportSQL,
   generateByZone,
+  updateZoneOfLane,
 } = mapManagementSlice.actions;
 
 export default mapManagementSlice.reducer;

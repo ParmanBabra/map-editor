@@ -1,6 +1,7 @@
 .content {
   border: rgb(3, 3, 3) solid 2px;
   background-color: rgb(255, 255, 255);
+  position: relative;
 }
 
 .wrapper {
@@ -12,4 +13,14 @@
 .map-name {
   position: absolute;
   left: 35px;
+}
+
+.selection-rect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 300px;
+  background-color: rgba(150, 150, 150, 0.25);
+  border: rgb(255, 0, 0) solid 1px;
 }

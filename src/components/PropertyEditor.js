@@ -7,27 +7,36 @@ import Slide from "@mui/material/Slide";
 import CommonProp from "./CommonProp";
 import MapProp from "./MapProp";
 import ZoneProp from "./ZoneProp";
+import LaneProp from "./LaneProp";
 
 import "./PropertyEditor.css";
 
 export default function PropertyEditor(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
+  const lanes = useSelector((state) => state.mapManagement.lanes);
   const map = useSelector((state) => state.mapManagement.map);
   const defaultValues = useSelector((state) => state.mapManagement.default);
   const selections = useSelector((state) => state.selection.selections);
   const isMap = useSelector((state) => state.selection.isMap);
 
-  let zone = null;
+  let selecting = null;
   let type = null;
 
   if (selections.length > 0) {
-    zone = zones[selections[0].id];
     type = selections[0].type;
+
+    if (type === "zone") {
+      selecting = zones[selections[0].id];
+    } else if (type === "lane") {
+      selecting = lanes[selections[0].id];
+    }
   }
 
-  function renderAnotherProps(zone) {
+  function renderAnotherProps(selecting) {
     if (type === "zone") {
-      return <ZoneProp selecting={zone} />;
+      return <ZoneProp selecting={selecting} />;
+    } else if (type === "lane") {
+      return <LaneProp selecting={selecting} />;
     }
   }
 
@@ -39,14 +48,14 @@ export default function PropertyEditor(props) {
     if (selection) {
       return (
         <Fragment>
-          <CommonProp selecting={zone} />
-          {renderAnotherProps(zone)}
+          <CommonProp selecting={selection} />
+          {renderAnotherProps(selection)}
         </Fragment>
       );
     }
   }
 
-  if (!zone && !isMap) {
+  if (!selecting && !isMap) {
     return <Fragment></Fragment>;
   }
 
@@ -54,7 +63,7 @@ export default function PropertyEditor(props) {
     <div className="editor">
       <Slide direction="left" in={true} mountOnEnter unmountOnExit>
         <Paper elevation={3} sx={{ p: 3 }}>
-          {renderProps(isMap, zone)}
+          {renderProps(isMap, selecting)}
         </Paper>
       </Slide>
     </div>

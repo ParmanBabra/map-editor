@@ -2,31 +2,35 @@ import React, { useEffect, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
+import _ from "lodash";
 
-import { updateSlot, deleteSlot } from "./../reducers/map-management";
-import { select, clear } from "./../reducers/selection";
+import { updateSlot } from "./../reducers/map-management";
+import { select, addSelect } from "./../reducers/selection";
 
 import "./Slot.css";
 
 export default function Slot(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
+  const keys = useSelector((state) => state.keyboard.keys);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const slot = { ...props.slot };
   const scale = props.scale;
 
-  let currentId = null;
+  let classStyle = ["rect"];
 
-  if (selections.length > 0) {
-    currentId = selections[0].id;
+  if (
+    _.find(selections, function (o) {
+      return o.id === slot.key && o.type === "slot";
+    })
+  ) {
+    classStyle.push("rect-selected");
   }
 
-  let classStyle = "rect";
-
-  if (currentId === slot.key) {
-    classStyle = classnames("rect", "rect-selected");
+  if (map.freezingZone) {
+    classStyle.push("react-freezing");
   }
 
   function snapGrid(grid2D, x, y) {
@@ -44,7 +48,6 @@ export default function Slot(props) {
     slot.x = x;
     slot.y = y;
 
-    dispatch(select(slot));
     dispatch(updateSlot(slot));
 
     return { x, y };
@@ -59,16 +62,17 @@ export default function Slot(props) {
     slot.x = x;
     slot.y = y;
 
-    dispatch(select(slot));
     dispatch(updateSlot(slot));
 
     return { x, y };
   }
 
-  function handleKeyDown(e) {
-    if (e.code === "Delete") {
-      dispatch(deleteSlot(slot));
-      dispatch(clear());
+  function handleOnSelect(e) {
+    if (map.freezingSlot) return;
+    if (keys["Control"]) {
+      dispatch(addSelect(slot));
+    } else {
+      dispatch(select(slot));
     }
   }
 
@@ -78,9 +82,9 @@ export default function Slot(props) {
 
   return (
     <Rnd
-      tabIndex={currentId === slot.key ? 0 : 1}
-      onKeyDown={handleKeyDown}
-      className={classStyle}
+      disableDragging={map.freezingSlot}
+      enableResizing={!map.freezingSlot}
+      className={classnames(classStyle)}
       bounds=".content"
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}
@@ -112,10 +116,10 @@ export default function Slot(props) {
 
         radRef.current.updatePosition(location);
       }}
+      onClick={(e) => handleOnSelect(e)}
       ref={radRef}
     >
       <svg className="item-area" width="100%" height="100%">
-
         <text x="10" y="20" className="small">
           Slot : {slot.name}
         </text>

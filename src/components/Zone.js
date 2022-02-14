@@ -2,31 +2,35 @@ import React, { useEffect, useRef, Fragment } from "react";
 import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
+import _ from "lodash";
 
-import { updateZone, deleteZone } from "./../reducers/map-management";
-import { select, clear } from "./../reducers/selection";
+import { updateZone } from "./../reducers/map-management";
+import { select, addSelect } from "./../reducers/selection";
 
 import "./Zone.css";
 
 export default function Zone(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
+  const keys = useSelector((state) => state.keyboard.keys);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const zone = { ...props.zone };
   const scale = props.scale;
 
-  let currentZoneId = null;
+  let classStyle = ["rect"];
 
-  if (selections.length > 0) {
-    currentZoneId = selections[0].id;
+  if (
+    _.find(selections, function (o) {
+      return o.id === zone.id && o.type === "zone";
+    })
+  ) {
+    classStyle.push("rect-selected");
   }
 
-  let classStyle = "rect";
-
-  if (currentZoneId === zone.id) {
-    classStyle = classnames("rect", "rect-selected");
+  if (map.freezingZone) {
+    classStyle.push("react-freezing");
   }
 
   function snapGrid(grid2D, x, y) {
@@ -44,7 +48,6 @@ export default function Zone(props) {
     zone.x = x;
     zone.y = y;
 
-    dispatch(select(zone));
     dispatch(updateZone(zone));
 
     return { x, y };
@@ -59,10 +62,19 @@ export default function Zone(props) {
     zone.x = x;
     zone.y = y;
 
-    dispatch(select(zone));
     dispatch(updateZone(zone));
 
     return { x, y };
+  }
+
+  function handleOnSelect(e) {
+    if (map.freezingZone) return;
+
+    if (keys["Control"]) {
+      dispatch(addSelect(zone));
+    } else {
+      dispatch(select(zone));
+    }
   }
 
   function createLineLanes() {
@@ -127,7 +139,7 @@ export default function Zone(props) {
   }
 
   function renderLane(_map, _lineLane) {
-    if (map.showLane) {
+    if (zone.autoGenerate) {
       return (
         <Fragment>
           {_lineLane.map((item, index) => (
@@ -146,7 +158,7 @@ export default function Zone(props) {
   }
 
   function renderSlot(_map, _rectSlot) {
-    if (map.showSlot) {
+    if (zone.autoGenerate) {
       return (
         <Fragment>
           {_rectSlot.map((item, index) => (
@@ -173,7 +185,9 @@ export default function Zone(props) {
 
   return (
     <Rnd
-      className={classStyle}
+      disableDragging={map.freezingZone}
+      enableResizing={!map.freezingZone}
+      className={classnames(classStyle)}
       bounds=".content"
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}
@@ -205,6 +219,7 @@ export default function Zone(props) {
 
         radRef.current.updatePosition(location);
       }}
+      onClick={(e) => handleOnSelect(e)}
       ref={radRef}
     >
       <svg className="item-area" width="100%" height="100%">

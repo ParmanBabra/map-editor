@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -9,12 +9,18 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import EditIcon from "@mui/icons-material/Edit";
+import EditOffIcon from "@mui/icons-material/EditOff";
 
 import {
   saveLocal,
   loadLocal,
   saveJson,
   exportSql,
+  updateMap,
 } from "./../reducers/map-management";
 import { selectMap } from "./../reducers/selection";
 
@@ -22,6 +28,8 @@ import LoadLocalDialog from "./LoadLocalDialog";
 import ExportDialog from "./ExportDialog";
 
 export default function ToolsBar(props) {
+  const map = useSelector((state) => state.mapManagement.map);
+
   const [anchorElFile, setAnchorElFile] = useState(null);
   const [anchorElMap, setAnchorElMap] = useState(null);
 
@@ -65,6 +73,45 @@ export default function ToolsBar(props) {
     if (!value) return;
 
     dispatch(loadLocal(value));
+  };
+
+  const handleUpdateMap = (value, fieldName) => {
+    setAnchorElMap(null);
+
+    let currentMap = { ...map };
+
+    currentMap[fieldName] = value;
+    dispatch(updateMap(currentMap));
+  };
+
+  const renderVisibility = (value) => {
+    if (!value)
+      return (
+        <ListItemIcon>
+          <VisibilityOffIcon />
+        </ListItemIcon>
+      );
+
+    return (
+      <ListItemIcon>
+        <VisibilityIcon />
+      </ListItemIcon>
+    );
+  };
+
+  const rendeFreezing = (value) => {
+    if (value)
+      return (
+        <ListItemIcon>
+          <EditOffIcon />
+        </ListItemIcon>
+      );
+
+    return (
+      <ListItemIcon>
+        <EditIcon />
+      </ListItemIcon>
+    );
   };
 
   return (
@@ -146,6 +193,61 @@ export default function ToolsBar(props) {
                 }}
               >
                 Map Information
+              </MenuItem>
+              <Divider light />
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showGrid, "showGrid");
+                }}
+              >
+                {renderVisibility(map.showGrid)}
+                Show Grid
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showLane, "showLane");
+                }}
+              >
+                {renderVisibility(map.showLane)}
+                Show Lane
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showSlot, "showSlot");
+                }}
+              >
+                {renderVisibility(map.showSlot)}
+                Show Slot
+              </MenuItem>
+
+              <Divider light />
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.freezingZone, "freezingZone");
+                }}
+              >
+                {rendeFreezing(map.freezingZone)}
+                Freezing Zone
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.freezingLane, "freezingLane");
+                }}
+              >
+                {rendeFreezing(map.freezingLane)}
+                Freezing Lane
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.freezingSlot, "freezingSlot");
+                }}
+              >
+                {rendeFreezing(map.freezingSlot)}
+                Freezing Slot
               </MenuItem>
             </Menu>
           </Box>
