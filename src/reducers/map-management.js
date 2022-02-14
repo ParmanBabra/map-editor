@@ -182,6 +182,10 @@ export const mapManagementSlice = createSlice({
           );
           index++;
         }
+      } else {
+        lane.zone_id = null;
+        lane.id = null;
+        lane.name = format(state.default.laneNameFormat, state.map.name, 0, 0);
       }
     },
     addZone: (state, action) => {
