@@ -62,7 +62,7 @@ export default function PropertyEditor(props) {
   return (
     <div className="editor">
       <Slide direction="left" in={true} mountOnEnter unmountOnExit>
-        <Paper elevation={3} sx={{ p: 3 }}>
+        <Paper elevation={3} sx={{ p: 3 }} className="paper">
           {renderProps(isMap, selecting)}
         </Paper>
       </Slide>

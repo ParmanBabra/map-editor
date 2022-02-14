@@ -4,3 +4,8 @@
   top: 90px;
   max-width: 350px;
 }
+
+.editor > .paper {
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
