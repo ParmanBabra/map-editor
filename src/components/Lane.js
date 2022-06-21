@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, Fragment } from "react";
 import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
@@ -12,6 +12,9 @@ import "./Lane.css";
 export default function Lane(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
+  const zone = useSelector(
+    (state) => state.mapManagement.zones[props.lane.zone_id]
+  );
   const keys = useSelector((state) => state.keyboard.keys);
   const dispatch = useDispatch();
   let radRef = useRef(null);
@@ -79,14 +82,89 @@ export default function Lane(props) {
       dispatch(select(lane));
     }
   }
+
+  function createSlotRect(_zone) {
+    let slots = [];
+
+    if (!_zone) return slots;
+
+    if (_zone.laneDirection === "Vertical") {
+      for (
+        let j = 0;
+        j <= lane.height - _zone.slotWidth;
+        j += _zone.slotWidth
+      ) {
+        slots.push({
+          x: 0.25,
+          y: j + 0.25,
+          width: lane.width - 0.5,
+          height: _zone.slotWidth - 0.5,
+          className: "preview-slot-rect",
+        });
+      }
+    } else {
+      for (let j = 0; j <= lane.width - _zone.slotWidth; j += _zone.slotWidth) {
+        slots.push({
+          x: j + 0.25,
+          y: 0 + 0.25,
+          width: _zone.slotWidth - 0.5,
+          height: lane.height - 0.5,
+          className: "preview-slot-rect",
+        });
+      }
+    }
+
+    return slots;
+  }
+
+  function renderSlot(_map, _zone, _rectSlot) {
+    if (!_zone) {
+      return <Fragment />;
+    }
+
+    if (lane.autoGenerate) {
+      if (lane.onlyOneSlot) {
+        return (
+          <Fragment>
+            <rect
+              key={`S${1}`}
+              x={0.25}
+              y={0.25}
+              width={lane.width - 2.5}
+              height={lane.height - 2.5}
+              className={"preview-slot-rect"}
+            />
+          </Fragment>
+        );
+      } else {
+        return (
+          <Fragment>
+            {_rectSlot.map((item, index) => (
+              <rect
+                key={`S${index}`}
+                x={item.x}
+                y={item.y}
+                width={item.width}
+                height={item.height}
+                className={item.className}
+              />
+            ))}
+          </Fragment>
+        );
+      }
+    }
+  }
+
+  const rectSlot = createSlotRect(zone);
+
   useEffect(() => {
     radRef.current.updatePosition({ x: lane.x, y: lane.y });
   });
 
   return (
     <Rnd
-      disableDragging={map.freezingLane}
-      enableResizing={!map.freezingLane}
+      disableDragging={map.freezingLane || map.disableMove}
+      enableResizing={!map.freezingLane || map.disableMove}
       className={classnames(classStyle)}
       bounds=".content"
       dragGrid={map.snapGrid}
@@ -101,7 +179,6 @@ export default function Lane(props) {
       scale={scale}
       size={{ width: lane.width, height: lane.height }}
       onDragStop={(e, d) => {
-        // console.log(d);
         const location = updateLocation(lane.key, d.x, d.y);
         radRef.current.updatePosition(location);
       }}
@@ -123,6 +200,8 @@ export default function Lane(props) {
       ref={radRef}
     >
       <svg className="item-area" width="100%" height="100%">
+        {renderSlot(map, zone, rectSlot)}
+
         <text x="10" y="20" className="small">
           Lane : {lane.name}
         </text>

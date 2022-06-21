@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
+import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import { useDispatch } from "react-redux";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
@@ -10,16 +12,57 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import Collapse from "@mui/material/Collapse";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
-import { updateLane, generateByZone } from "./../reducers/map-management";
+import _ from "lodash";
+import Color from "color";
+import {
+  updateLane,
+  generateByLane,
+  addPriority,
+  deletePriority,
+  updatePriority,
+} from "./../reducers/map-management";
 
 import "./PropertyEditor.css";
 
+const ExpandMore = styled((props) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
+  marginLeft: "auto",
+  transition: theme.transitions.create("transform", {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
+
+const tableCellSX = { px: "8px", py: "3px" };
+
 export default function LaneProp(props) {
+  const shipToGroups = useSelector(
+    (state) => state.shipToGroupsManagement.shipToGroups
+  );
+
   let lane = props.selecting;
+  let priorites = _.values(lane.priorites);
+  let selectedShipToGroups = priorites.map((item) => item.shipToGroup);
 
   const dispatch = useDispatch();
-  // const [x, setX] = useState(zone?.x);
+  const [showPriorites, setShowPriorites] = useState(false);
 
   function updateProp(value, propName) {
     if (lane == null) return;
@@ -50,7 +93,7 @@ export default function LaneProp(props) {
           Lane Property
         </Typography>
       </Grid>
-      
+
       <Grid item xs={12} sm={6}>
         <TextField
           label="Slot Width"
@@ -120,12 +163,161 @@ export default function LaneProp(props) {
         />
       </Grid>
       <Grid item xs={12} sm={6}>
-        <Button
-          variant="contained"
-          onClick={() => dispatch(generateByZone(lane.id))}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={lane.onlyOneSlot}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "onlyOneSlot")
+              }
+            />
+          }
+          label="Only One Slot"
+        />
+      </Grid>
+      {lane.zone_id ? (
+        <Grid item xs={12} sm={6}>
+          <Button
+            variant="contained"
+            onClick={() => dispatch(generateByLane(lane.key))}
+          >
+            Genarate
+          </Button>
+        </Grid>
+      ) : null}
+      <Grid item sm={4} textAlign={"start"}>
+        <Typography variant="h5" component="h5">
+          Priorites
+        </Typography>
+      </Grid>
+      <Grid item sm={8} textAlign={"end"}>
+        <IconButton>
+          <ContentCopyIcon />
+        </IconButton>
+        <IconButton>
+          <ContentPasteIcon />
+        </IconButton>
+        <IconButton
+          onClick={(e) => {
+            dispatch(addPriority(lane.key));
+          }}
         >
-          Genarate
-        </Button>
+          <AddIcon />
+        </IconButton>
+        <ExpandMore
+          expand={showPriorites}
+          onClick={() => {
+            setShowPriorites(!showPriorites);
+          }}
+        >
+          <ExpandMoreIcon />
+        </ExpandMore>
+      </Grid>
+
+      <Grid item xs={12} sm={12}>
+        <Collapse in={showPriorites} timeout="auto" unmountOnExit>
+          <TableContainer component={Paper}>
+            <Table size="small" aria-label="a dense table">
+              <TableBody>
+                {_.values(lane.priorites).map((row, index) => {
+                  // let selectingShipToGroup = shipToGroups[row.shipToGroup];
+
+                  return (
+                    <TableRow
+                      key={row.key}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                    >
+                      <TableCell
+                        sx={tableCellSX}
+                        align="center"
+                        component="th"
+                        scope="row"
+                      >
+                        {index + 1}
+                      </TableCell>
+                      <TableCell sx={tableCellSX}>
+                        <FormControl sx={{ width: 120 }} size="small">
+                          <InputLabel>Ship Group</InputLabel>
+                          <Select
+                            label="Ship Group"
+                            value={row.shipToGroup}
+                            onChange={(e) => {
+                              let priority = { ...lane.priorites[row.key] };
+                              priority.shipToGroup = e.target.value;
+                              dispatch(
+                                updatePriority({
+                                  id: lane.key,
+                                  key: row.key,
+                                  data: priority,
+                                })
+                              );
+                            }}
+                          >
+                            <MenuItem value={null}>
+                              <em>None</em>
+                            </MenuItem>
+                            {_.values(shipToGroups).map((item) => {
+                              return (
+                                <MenuItem
+                                  disabled={selectedShipToGroups.includes(
+                                    item.id
+                                  )}
+                                  value={item.id}
+                                >
+                                  {item.name}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell sx={tableCellSX}>
+                        <FormControl sx={{ width: 80 }} size="small">
+                          <InputLabel>PP/PM</InputLabel>
+                          <Select
+                            label="PP/PM"
+                            value={row.type}
+                            onChange={(e) => {
+                              let priority = { ...lane.priorites[row.key] };
+                              priority.type = e.target.value;
+                              dispatch(
+                                updatePriority({
+                                  id: lane.key,
+                                  key: row.key,
+                                  data: priority,
+                                })
+                              );
+                            }}
+                          >
+                            <MenuItem value={null}>
+                              <em>None</em>
+                            </MenuItem>
+                            <MenuItem value={"10"}>PP</MenuItem>
+                            <MenuItem value={"20"}>PM</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell sx={{ ...tableCellSX, ...{ width: 40 } }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            dispatch(
+                              deletePriority({ id: lane.key, key: row.key })
+                            );
+                          }}
+                        >
+                          <RemoveIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
       </Grid>
     </Grid>
   );

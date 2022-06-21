@@ -3,8 +3,9 @@ import { Rnd } from "react-rnd";
 import { useSelector, useDispatch } from "react-redux";
 import classnames from "classnames";
 import _ from "lodash";
+import Color from "color";
 
-import { updateZone } from "./../reducers/map-management";
+import { updateZone, updateLanesOfZone } from "./../reducers/map-management";
 import { select, addSelect } from "./../reducers/selection";
 
 import "./Zone.css";
@@ -49,6 +50,7 @@ export default function Zone(props) {
     zone.y = y;
 
     dispatch(updateZone(zone));
+    dispatch(updateLanesOfZone(zone.id));
 
     return { x, y };
   }
@@ -140,40 +142,128 @@ export default function Zone(props) {
 
   function renderLane(_map, _lineLane) {
     if (zone.autoGenerate) {
-      return (
-        <Fragment>
-          {_lineLane.map((item, index) => (
-            <line
-              key={`L${index}`}
-              x1={item.x1}
-              y1={item.y1}
-              x2={item.x2}
-              y2={item.y2}
-              className={item.className}
+      if (zone.onlyOneSlot) {
+        return (
+          <Fragment>
+            <rect
+              key={`S${1}`}
+              x={0}
+              y={0}
+              width={zone.width - 1.75}
+              height={zone.height - 1.75}
+              className={"preview-lane-line"}
             />
-          ))}
-        </Fragment>
-      );
+            ;
+          </Fragment>
+        );
+      } else {
+        return (
+          <Fragment>
+            {_lineLane.map((item, index) => (
+              <line
+                key={`L${index}`}
+                x1={item.x1}
+                y1={item.y1}
+                x2={item.x2}
+                y2={item.y2}
+                className={item.className}
+              />
+            ))}
+          </Fragment>
+        );
+      }
     }
   }
 
   function renderSlot(_map, _rectSlot) {
     if (zone.autoGenerate) {
-      return (
-        <Fragment>
-          {_rectSlot.map((item, index) => (
+      if (zone.onlyOneSlot) {
+        return (
+          <Fragment>
             <rect
-              key={`S${index}`}
-              x={item.x}
-              y={item.y}
-              width={item.width}
-              height={item.height}
-              className={item.className}
+              key={`S${1}`}
+              x={0.25}
+              y={0.25}
+              width={zone.width - 2.5}
+              height={zone.height - 2.5}
+              className={"preview-slot-rect"}
             />
-          ))}
-        </Fragment>
-      );
+          </Fragment>
+        );
+      } else {
+        return (
+          <Fragment>
+            {_rectSlot.map((item, index) => (
+              <rect
+                key={`S${index}`}
+                x={item.x}
+                y={item.y}
+                width={item.width}
+                height={item.height}
+                className={item.className}
+              />
+            ))}
+          </Fragment>
+        );
+      }
     }
+  }
+
+  function renderWalls(_map, _zone) {
+    function renderVertical(_zone) {
+      if (_zone.wallVertical === "top") {
+        return (
+          <rect
+            x="0"
+            y="0"
+            width={_zone.width - 2}
+            height="5"
+            className="wall"
+          />
+        );
+      } else {
+        return (
+          <rect
+            x="0"
+            y={_zone.height - 7}
+            width={_zone.width - 2}
+            height="5"
+            className="wall"
+          />
+        );
+      }
+    }
+
+    function renderHorizontal(_zone) {
+      if (_zone.wallHorizontal === "left") {
+        return (
+          <rect
+            x="0"
+            y="0"
+            width="5"
+            height={_zone.height - 2}
+            className="wall"
+          />
+        );
+      } else {
+        return (
+          <rect
+            x={_zone.width - 7}
+            y="0"
+            width="5"
+            height={_zone.height - 2}
+            className="wall"
+          />
+        );
+      }
+    }
+
+    return (
+      <Fragment>
+        {renderVertical(_zone)}
+        {renderHorizontal(_zone)}
+      </Fragment>
+    );
   }
 
   useEffect(() => {
@@ -185,9 +275,14 @@ export default function Zone(props) {
 
   return (
     <Rnd
-      disableDragging={map.freezingZone}
-      enableResizing={!map.freezingZone}
+      disableDragging={map.freezingZone || map.disableMove}
+      enableResizing={!map.freezingZone || map.disableMove}
       className={classnames(classStyle)}
+      style={{
+        backgroundColor: map.showZoneRealColor
+          ? `${zone.color}FF`
+          : `${zone.color}96`,
+      }}
       bounds=".content"
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}
@@ -201,7 +296,6 @@ export default function Zone(props) {
       scale={scale}
       size={{ width: zone.width, height: zone.height }}
       onDragStop={(e, d) => {
-        // console.log(d);
         const location = updateLocation(zone.id, d.x, d.y);
         radRef.current.updatePosition(location);
       }}
@@ -225,9 +319,40 @@ export default function Zone(props) {
       <svg className="item-area" width="100%" height="100%">
         {renderSlot(map, rectSlot)}
         {renderLane(map, lineLane)}
+        {zone.localtionType === "storage" ? renderWalls(map, zone) : null}
+        {zone.localtionType === "storage" && map.showMaker ? (
+          <svg
+            viewBox="0 0 24 24"
+            width={map.makerSize}
+            height={map.makerSize}
+            style={{ overflow: "visible" }}
+            x={zone.markLocationX}
+            y={zone.markLocationY}
+          >
+            <path
+              style={{ transform: "translate(-12px, -24px)" }}
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+            ></path>
+          </svg>
+        ) : null}
 
-        <text x="10" y="20" className="small">
-          Zone : {zone.name}
+        {zone.localtionType === "storage" && map.showProgress ? (
+          <rect
+            x={zone.progressX}
+            y={zone.progressY}
+            width={zone.progressWidth}
+            height={zone.progressHeight}
+            rx="20"
+            ry="20"
+          />
+        ) : null}
+        <text
+          x={zone.labelLocationX}
+          y={zone.labelLocationY}
+          className="small lable-text"
+          style={{ fontSize: `${map.zoneTextSize}px`, fill: zone.labelColor }}
+        >
+          Zone {zone.name}
         </text>
       </svg>
     </Rnd>

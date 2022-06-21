@@ -157,6 +157,25 @@ export default function MapProp(props) {
           onChange={(e) => updateSnapGrid(e.target.value, 1)}
         />
       </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="Text Size"
+          fullWidth
+          size="small"
+          value={map.zoneTextSize}
+          onChange={(e) => updatePropNumber(e.target.value, "zoneTextSize")}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          label="Maker Size"
+          fullWidth
+          size="small"
+          value={map.makerSize}
+          onChange={(e) => updatePropNumber(e.target.value, "makerSize")}
+        />
+      </Grid>
+
       <Grid item xs={12} sm={12} textAlign={"start"}>
         <FormControlLabel
           control={
@@ -166,6 +185,15 @@ export default function MapProp(props) {
             />
           }
           label="Show Grid"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.showZone}
+              onChange={(e) => updatePropBoolean(e.target.checked, "showZone")}
+            />
+          }
+          label="Show Zone"
         />
         <FormControlLabel
           control={
@@ -184,6 +212,86 @@ export default function MapProp(props) {
             />
           }
           label="Show Slot"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.showMaker}
+              onChange={(e) => updatePropBoolean(e.target.checked, "showMaker")}
+            />
+          }
+          label="Show Maker"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.showProgress}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "showProgress")
+              }
+            />
+          }
+          label="Show Progress"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.showZoneRealColor}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "showZoneRealColor")
+              }
+            />
+          }
+          label="Show Zone Color"
+        />
+      </Grid>
+      <Grid item xs={12} sm={12} textAlign={"start"}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.isRequestForkliftGRProduction}
+              onChange={(e) =>
+                updatePropBoolean(
+                  e.target.checked,
+                  "isRequestForkliftGRProduction"
+                )
+              }
+            />
+          }
+          label="Request Forklift GR Production"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.isRequestForkliftGRStoPo}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "isRequestForkliftGRStoPo")
+              }
+            />
+          }
+          label="Request Forklift GR Sto/Po"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.isRequestForkliftGI}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "isRequestForkliftGI")
+              }
+            />
+          }
+          label="Request Forklift GI"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.isTrackingLocation}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "isTrackingLocation")
+              }
+            />
+          }
+          label="Tracking Location"
         />
       </Grid>
 

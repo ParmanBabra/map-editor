@@ -4,30 +4,47 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useDispatch } from "react-redux";
 
-import { updateZone } from "./../reducers/map-management";
+import {
+  updateZone,
+  updateLane,
+  updateSlot,
+} from "./../reducers/map-management";
 
 import "./PropertyEditor.css";
 
 export default function CommonProp(props) {
-  let zone = props.selecting;
+  let element = props.selecting;
 
   const dispatch = useDispatch();
   // const [x, setX] = useState(zone?.x);
 
   function updateProp(value, propName) {
-    if (zone == null) return;
+    if (element == null) return;
     if (!value || value === "") value = 0;
     // console.log(value);
-    const currentZone = { ...zone };
-    currentZone[propName] = parseFloat(value);
-    dispatch(updateZone(currentZone));
+    const currentElement = { ...element };
+    currentElement[propName] = parseFloat(value);
+
+    if (currentElement.type === "zone") {
+      dispatch(updateZone(currentElement));
+    } else if (currentElement.type === "lane") {
+      dispatch(updateLane(currentElement));
+    } else {
+      dispatch(updateSlot(currentElement));
+    }
   }
 
   function updatePropString(value, propName) {
     // console.log(value);
-    const currentZone = { ...zone };
-    currentZone[propName] = value;
-    dispatch(updateZone(currentZone));
+    const currentElement = { ...element };
+    currentElement[propName] = value;
+    if (currentElement.type === "zone") {
+      dispatch(updateZone(currentElement));
+    } else if (currentElement.type === "lane") {
+      dispatch(updateLane(currentElement));
+    } else {
+      dispatch(updateSlot(currentElement));
+    }
   }
 
   return (
@@ -42,7 +59,7 @@ export default function CommonProp(props) {
           label="Name"
           fullWidth
           size="small"
-          value={zone.name}
+          value={element.name}
           onChange={(e) => updatePropString(e.target.value, "name")}
         />
       </Grid>
@@ -51,7 +68,7 @@ export default function CommonProp(props) {
           label="X"
           fullWidth
           size="small"
-          value={zone.x}
+          value={element.x}
           onChange={(e) => updateProp(e.target.value, "x")}
         />
       </Grid>
@@ -60,7 +77,7 @@ export default function CommonProp(props) {
           label="Y"
           fullWidth
           size="small"
-          value={zone.y}
+          value={element.y}
           onChange={(e) => updateProp(e.target.value, "y")}
         />
       </Grid>
@@ -69,7 +86,7 @@ export default function CommonProp(props) {
           label="Width"
           fullWidth
           size="small"
-          value={zone.width}
+          value={element.width}
           onChange={(e) => updateProp(e.target.value, "width")}
         />
       </Grid>
@@ -78,7 +95,7 @@ export default function CommonProp(props) {
           label="Height"
           fullWidth
           size="small"
-          value={zone.height}
+          value={element.height}
           onChange={(e) => updateProp(e.target.value, "height")}
         />
       </Grid>

@@ -14,6 +14,7 @@ import {
   deleteZones,
   deleteLanes,
   deleteSlots,
+  addZoneWithSelections,
 } from "./../reducers/map-management";
 import { clear, selectWithRect } from "./../reducers/selection";
 
@@ -56,6 +57,10 @@ export default function Designer(props) {
 
   function handleAddLane() {
     dispatch(addLane());
+  }
+
+  function handleGroupZone() {
+    dispatch(addZoneWithSelections(selections));
   }
 
   // const handleMouseDown = (e) => {
@@ -149,6 +154,16 @@ export default function Designer(props) {
     if (map.showGrid) {
       return <Grid map={map} />;
     }
+  }
+
+  function renderZones(zones, map) {
+    if (!map.showZone) return;
+
+    return _.map(zones, (zone) => {
+      return (
+        <Zone key={zone.id} zone={zone} scale={zoomInformation.scale}></Zone>
+      );
+    });
   }
 
   function renderLanes(lanes, map) {
@@ -260,15 +275,7 @@ export default function Designer(props) {
 
           {renderGrid()}
 
-          {_.map(zones, (zone) => {
-            return (
-              <Zone
-                key={zone.id}
-                zone={zone}
-                scale={zoomInformation.scale}
-              ></Zone>
-            );
-          })}
+          {renderZones(zones, map)}
 
           {renderLanes(lanes, map)}
 
@@ -295,6 +302,12 @@ export default function Designer(props) {
           icon={<AddIcon />}
           tooltipTitle="Add Lane"
           onClick={(e) => handleAddLane()}
+        />
+
+        <SpeedDialAction
+          icon={<AddIcon />}
+          tooltipTitle="Group Zone"
+          onClick={(e) => handleGroupZone()}
         />
 
         <SpeedDialAction icon={<AddIcon />} tooltipTitle="Add Slot" />

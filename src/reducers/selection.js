@@ -36,7 +36,6 @@ export const selectionSlice = createSlice({
           id: action.payload.key,
           type: action.payload.type,
         });
-        console.log(action);
       } else {
         state.selections.push({
           id: action.payload.id,

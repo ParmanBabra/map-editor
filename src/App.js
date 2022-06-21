@@ -1,11 +1,12 @@
 import "./App.css";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import Designer from "./components/Designer";
 import ToolsBar from "./components/ToolsBar";
 import PropertyEditor from "./components/PropertyEditor";
+
 
 import { up, down, mouseDown, mouseUp } from "./reducers/keyboard-management";
 
@@ -45,6 +46,7 @@ function App() {
       <ToolsBar />
       <Designer />
       <PropertyEditor />
+      
     </div>
   );
 }

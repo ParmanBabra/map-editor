@@ -82,8 +82,8 @@ export default function Slot(props) {
 
   return (
     <Rnd
-      disableDragging={map.freezingSlot}
-      enableResizing={!map.freezingSlot}
+      disableDragging={map.freezingSlot || map.disableMove}
+      enableResizing={!map.freezingSlot || map.disableMove}
       className={classnames(classStyle)}
       bounds=".content"
       dragGrid={map.snapGrid}

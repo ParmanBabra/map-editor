@@ -14,6 +14,7 @@ import "./PropertyEditor.css";
 export default function PropertyEditor(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
+  const slots = useSelector((state) => state.mapManagement.slots);
   const map = useSelector((state) => state.mapManagement.map);
   const defaultValues = useSelector((state) => state.mapManagement.default);
   const selections = useSelector((state) => state.selection.selections);
@@ -29,6 +30,8 @@ export default function PropertyEditor(props) {
       selecting = zones[selections[0].id];
     } else if (type === "lane") {
       selecting = lanes[selections[0].id];
+    } else if (type === "slot") {
+      selecting = slots[selections[0].id];
     }
   }
 

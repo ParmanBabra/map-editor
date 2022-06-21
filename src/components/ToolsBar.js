@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import AppBar from "@mui/material/AppBar";
@@ -21,11 +21,19 @@ import {
   saveJson,
   exportSql,
   updateMap,
+  importLanes,
 } from "./../reducers/map-management";
+import {
+  importShipToGroup,
+  save,
+  load,
+} from "./../reducers/ship-to-group-management";
 import { selectMap } from "./../reducers/selection";
+import selectFiles from "select-files";
 
 import LoadLocalDialog from "./LoadLocalDialog";
 import ExportDialog from "./ExportDialog";
+import ShipToGroupDialog from "./ShipToGroupDialog";
 
 export default function ToolsBar(props) {
   const map = useSelector((state) => state.mapManagement.map);
@@ -36,8 +44,18 @@ export default function ToolsBar(props) {
   const [openExport, setOpenExport] = useState(false);
   const [exportSQLs, setExportSQLs] = useState([]);
   const [openLoad, setOpenLoad] = useState(false);
+  const [openShipToGroup, setOpenShipToGroup] = useState(false);
 
   const dispatch = useDispatch();
+
+  const handleCloseShipToGroup = (e) => {
+    setOpenShipToGroup(false);
+  };
+
+  const handleOpenShipToGroup = (e) => {
+    setAnchorElMap(null);
+    setOpenShipToGroup(true);
+  };
 
   const handleOpenNavFile = (event) => {
     setAnchorElFile(event.currentTarget);
@@ -68,11 +86,13 @@ export default function ToolsBar(props) {
     setOpenLoad(true);
   };
 
-  const handleCloseLoad = (value) => {
+  const handleCloseLoad = async (value) => {
     setOpenLoad(false);
     if (!value) return;
 
-    dispatch(loadLocal(value));
+    let result = await dispatch(loadLocal(value)).unwrap();
+
+    dispatch(load(result.map.warehouseId));
   };
 
   const handleUpdateMap = (value, fieldName) => {
@@ -82,6 +102,20 @@ export default function ToolsBar(props) {
 
     currentMap[fieldName] = value;
     dispatch(updateMap(currentMap));
+  };
+
+  const handleClickLoadLanes = async () => {
+    setAnchorElFile(null);
+    let files = await selectFiles({ accept: ".csv" });
+
+    dispatch(importLanes(files[0]));
+  };
+
+  const handleClickLoadShipToGroups = async () => {
+    setAnchorElFile(null);
+    let files = await selectFiles({ accept: ".csv" });
+
+    dispatch(importShipToGroup(files[0]));
   };
 
   const renderVisibility = (value) => {
@@ -153,6 +187,7 @@ export default function ToolsBar(props) {
                 onClick={(e) => {
                   handleCloseNavFile();
                   dispatch(saveLocal());
+                  dispatch(save(map.warehouseId));
                 }}
               >
                 Save
@@ -167,6 +202,12 @@ export default function ToolsBar(props) {
               </MenuItem>
               <MenuItem onClick={(e) => handleClickOpenLoad()}>Load</MenuItem>
               <MenuItem>Load Json</MenuItem>
+              <MenuItem onClick={(e) => handleClickLoadLanes()}>
+                Load Lanes CSV
+              </MenuItem>
+              <MenuItem onClick={(e) => handleClickLoadShipToGroups()}>
+                Load Ship To Group CSV
+              </MenuItem>
               <Divider light />
               <MenuItem onClick={handleClickExport}>Export SQL</MenuItem>
             </Menu>
@@ -194,6 +235,10 @@ export default function ToolsBar(props) {
               >
                 Map Information
               </MenuItem>
+
+              <MenuItem onClick={(e) => handleOpenShipToGroup()}>
+                Ship To Groups
+              </MenuItem>
               <Divider light />
               <MenuItem
                 onClick={(e) => {
@@ -202,6 +247,15 @@ export default function ToolsBar(props) {
               >
                 {renderVisibility(map.showGrid)}
                 Show Grid
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showZone, "showZone");
+                }}
+              >
+                {renderVisibility(map.showZone)}
+                Show Zone
               </MenuItem>
 
               <MenuItem
@@ -220,6 +274,33 @@ export default function ToolsBar(props) {
               >
                 {renderVisibility(map.showSlot)}
                 Show Slot
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showMaker, "showMaker");
+                }}
+              >
+                {renderVisibility(map.showMaker)}
+                Show Maker
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showProgress, "showProgress");
+                }}
+              >
+                {renderVisibility(map.showProgress)}
+                Show Progress
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showZoneRealColor, "showZoneRealColor");
+                }}
+              >
+                {renderVisibility(map.showZoneRealColor)}
+                Show Zone Color
               </MenuItem>
 
               <Divider light />
@@ -249,6 +330,15 @@ export default function ToolsBar(props) {
                 {rendeFreezing(map.freezingSlot)}
                 Freezing Slot
               </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.disableMove, "disableMove");
+                }}
+              >
+                {rendeFreezing(map.disableMove)}
+                Disable Move
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
@@ -260,6 +350,11 @@ export default function ToolsBar(props) {
         exportSQLs={exportSQLs}
       />
       <LoadLocalDialog open={openLoad} onClose={handleCloseLoad} />
+
+      <ShipToGroupDialog
+        open={openShipToGroup}
+        onClose={handleCloseShipToGroup}
+      />
     </AppBar>
   );
 }
