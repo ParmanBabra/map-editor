@@ -1,5 +1,5 @@
 export const downloadFile = async (data, fileName) => {
-  const json = JSON.stringify(data);
+  const json = JSON.stringify(data, null, "\t");
   const blob = new Blob([json], { type: "application/json" });
   const href = await URL.createObjectURL(blob);
   const link = document.createElement("a");

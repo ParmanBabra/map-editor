@@ -35,7 +35,10 @@ import {
   addPriority,
   deletePriority,
   updatePriority,
+  pasteLanePriorites,
 } from "./../reducers/map-management";
+
+import { copyLanePriorites } from "./../reducers/selection";
 
 import "./PropertyEditor.css";
 
@@ -55,6 +58,10 @@ const tableCellSX = { px: "8px", py: "3px" };
 export default function LaneProp(props) {
   const shipToGroups = useSelector(
     (state) => state.shipToGroupsManagement.shipToGroups
+  );
+
+  const hasLanePriorites = useSelector(
+    (state) => state.selection.contents.type === "LanePriorites"
   );
 
   let lane = props.selecting;
@@ -176,7 +183,7 @@ export default function LaneProp(props) {
         />
       </Grid>
       {lane.zone_id ? (
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={12} textAlign={"start"}>
           <Button
             variant="contained"
             onClick={() => dispatch(generateByLane(lane.key))}
@@ -192,10 +199,18 @@ export default function LaneProp(props) {
       </Grid>
       <Grid item sm={8} textAlign={"end"}>
         <IconButton>
-          <ContentCopyIcon />
+          <ContentCopyIcon
+            onClick={(e) => {
+              dispatch(copyLanePriorites(lane.key));
+            }}
+          />
         </IconButton>
-        <IconButton>
-          <ContentPasteIcon />
+        <IconButton disabled={!hasLanePriorites}>
+          <ContentPasteIcon
+            onClick={(e) => {
+              dispatch(pasteLanePriorites(lane.key));
+            }}
+          />
         </IconButton>
         <IconButton
           onClick={(e) => {
@@ -220,7 +235,13 @@ export default function LaneProp(props) {
             <Table size="small" aria-label="a dense table">
               <TableBody>
                 {_.values(lane.priorites).map((row, index) => {
-                  // let selectingShipToGroup = shipToGroups[row.shipToGroup];
+                  let shipColor = Color("#FFFFFF");
+                  if (row.shipToGroup) {
+                    let selectingShipToGroup = shipToGroups[row.shipToGroup];
+                    shipColor = Color(selectingShipToGroup.color);
+                  }
+
+                  let textShipColor = shipColor.grayscale().negate();
 
                   return (
                     <TableRow
@@ -241,11 +262,20 @@ export default function LaneProp(props) {
                         <FormControl sx={{ width: 120 }} size="small">
                           <InputLabel>Ship Group</InputLabel>
                           <Select
+                            inputProps={{
+                              sx: {
+                                backgroundColor: shipColor.hex(),
+                                color: textShipColor.hex(),
+                              },
+                            }}
                             label="Ship Group"
-                            value={row.shipToGroup}
+                            value={
+                              row.shipToGroup == null ? "" : row.shipToGroup
+                            }
                             onChange={(e) => {
                               let priority = { ...lane.priorites[row.key] };
-                              priority.shipToGroup = e.target.value;
+                              priority.shipToGroup =
+                                e.target.value == "" ? null : e.target.value;
                               dispatch(
                                 updatePriority({
                                   id: lane.key,
@@ -255,12 +285,13 @@ export default function LaneProp(props) {
                               );
                             }}
                           >
-                            <MenuItem value={null}>
+                            <MenuItem value="">
                               <em>None</em>
                             </MenuItem>
                             {_.values(shipToGroups).map((item) => {
                               return (
                                 <MenuItem
+                                  key={item.id}
                                   disabled={selectedShipToGroups.includes(
                                     item.id
                                   )}
@@ -278,10 +309,11 @@ export default function LaneProp(props) {
                           <InputLabel>PP/PM</InputLabel>
                           <Select
                             label="PP/PM"
-                            value={row.type}
+                            value={row.type == null ? "" : row.type}
                             onChange={(e) => {
                               let priority = { ...lane.priorites[row.key] };
-                              priority.type = e.target.value;
+                              priority.type =
+                                e.target.value == "" ? null : e.target.value;
                               dispatch(
                                 updatePriority({
                                   id: lane.key,
@@ -291,7 +323,7 @@ export default function LaneProp(props) {
                               );
                             }}
                           >
-                            <MenuItem value={null}>
+                            <MenuItem value="">
                               <em>None</em>
                             </MenuItem>
                             <MenuItem value={"10"}>PP</MenuItem>

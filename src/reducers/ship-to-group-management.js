@@ -3,7 +3,21 @@ import Papa from "papaparse";
 import localStorage from "local-storage";
 
 export const importShipToGroup = createAsyncThunk(
-  "ship-to-Group-management/import",
+  "ship-to-group-management/import",
+  async (file, thunkAPI) => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          resolve(results.data);
+        },
+      });
+    });
+  }
+);
+
+export const ExportSQL = createAsyncThunk(
+  "ship-to-group-management/export-sql",
   async (file, thunkAPI) => {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {

@@ -19,6 +19,7 @@ import {
   saveLocal,
   loadLocal,
   saveJson,
+  loadJson,
   exportSql,
   updateMap,
   importLanes,
@@ -102,6 +103,13 @@ export default function ToolsBar(props) {
 
     currentMap[fieldName] = value;
     dispatch(updateMap(currentMap));
+  };
+
+  const handleClickLoadJson = async () => {
+    setAnchorElFile(null);
+    let files = await selectFiles({ accept: ".json" });
+
+    dispatch(loadJson(files[0]));
   };
 
   const handleClickLoadLanes = async () => {
@@ -201,7 +209,7 @@ export default function ToolsBar(props) {
                 Save Json
               </MenuItem>
               <MenuItem onClick={(e) => handleClickOpenLoad()}>Load</MenuItem>
-              <MenuItem>Load Json</MenuItem>
+              <MenuItem onClick={(e) => handleClickLoadJson()}>Load Json</MenuItem>
               <MenuItem onClick={(e) => handleClickLoadLanes()}>
                 Load Lanes CSV
               </MenuItem>

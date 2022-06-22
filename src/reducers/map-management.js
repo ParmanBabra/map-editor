@@ -35,9 +35,21 @@ export const loadLocal = createAsyncThunk(
 export const saveJson = createAsyncThunk(
   "map-management/save-json",
   async (_, thunkAPI) => {
-    let state = thunkAPI.getState().mapManagement;
-    let { map } = state;
-    await downloadFile(state, `WH_${map.warehouseId}-MAP_${map.name}`);
+    let data = { ...thunkAPI.getState().mapManagement };
+    delete data.mapList;
+
+    let shipToGroups = thunkAPI.getState().shipToGroupsManagement.shipToGroups;
+    data.shipToGroups = shipToGroups;
+
+    await downloadFile(data, `WH_${data.map.warehouseId}-MAP_${data.map.name}`);
+  }
+);
+
+export const loadJson = createAsyncThunk(
+  "map-management/load-json",
+  async (file, thunkAPI) => {
+    let text = await file.text();
+    return JSON.parse(text);
   }
 );
 
@@ -72,21 +84,65 @@ export const importLanes = createAsyncThunk(
   }
 );
 
-// type ZoneProps = {
-//   id: number,
-//   name: string,
-//   x: number,
-//   y: number,
-//   width: number,
-//   height: number,
-//   laneDirection: string, //vertical, horizontal
-//   laneWidth: number,
-// };
+export const pasteLanePriorites = createAsyncThunk(
+  "map-management/paste-lanes-priorites",
+  async (destinationKey, thunkAPI) => {
+    let { contents, selections } = thunkAPI.getState().selection;
 
-// type SelectionProps = {
-//   id: number,
-//   type: string,
-// };
+    if (selections.length < 1) return;
+    if (contents.type !== "LanePriorites") return;
+
+    return { source: contents.value, destination: destinationKey };
+  }
+);
+
+const loadData = (data, state) => {
+  for (const key in data.zones) {
+    let zone = data.zones[key];
+    zone = {
+      ...{
+        color: "#FFFFFF",
+        labelLocationX: 10,
+        labelLocationY: 20,
+        labelColor: "#000000",
+        markLocationX: 0,
+        markLocationY: 0,
+        progressX: 0,
+        progressY: 0,
+        progressWidth: 0,
+        progressHeight: 0,
+        wallHorizontal: "left",
+        wallVertical: "top",
+      },
+      ...zone,
+    };
+    data.zones[key] = zone;
+  }
+
+  for (const key in data.lanes) {
+    let lane = data.lanes[key];
+    lane = {
+      ...{
+        priorites: {},
+        autoAdjustZone: true,
+        autoGenerate: false,
+        onlyOneSlot: false,
+        localtionType: "storage",
+        slotWidth: data.default.slotWidth,
+        capacity: 0,
+      },
+      ...lane,
+    };
+    data.lanes[key] = lane;
+  }
+
+  state.map = { ...state.map, ...data.map };
+  state.default = { ...state.default, ...data.default };
+  state.zones = data.zones;
+  state.lanes = data.lanes;
+
+  return state;
+};
 
 export const mapManagementSlice = createSlice({
   name: "mapManagement",
@@ -412,7 +468,7 @@ export const mapManagementSlice = createSlice({
     },
     addPriority: (state, action) => {
       let lane = state.lanes[action.payload];
-      let key = uuidv4();
+      let key = (new Date()).getTime();
 
       lane.priorites[key] = { key: key, shipToGroup: null, type: null };
     },
@@ -676,51 +732,8 @@ export const mapManagementSlice = createSlice({
 
       let data = { ...state, ...action.payload };
 
-      for (const key in data.zones) {
-        let zone = data.zones[key];
-        zone = {
-          ...{
-            color: "#FFFFFF",
-            labelLocationX: 10,
-            labelLocationY: 20,
-            labelColor: "#000000",
-            markLocationX: 0,
-            markLocationY: 0,
-            progressX: 0,
-            progressY: 0,
-            progressWidth: 0,
-            progressHeight: 0,
-            wallHorizontal: "left",
-            wallVertical: "top",
-          },
-          ...zone,
-        };
-        data.zones[key] = zone;
-      }
-
-      for (const key in data.lanes) {
-        let lane = data.lanes[key];
-        lane = {
-          ...{
-            priorites: {},
-            autoAdjustZone: true,
-            autoGenerate: false,
-            onlyOneSlot: false,
-            localtionType: "storage",
-            slotWidth: data.default.slotWidth,
-            capacity: 0,
-          },
-          ...lane,
-        };
-        data.lanes[key] = lane;
-      }
-
-      state.map = { ...state.map, ...data.map };
-      state.default = { ...state.default, ...data.default };
-      state.zones = data.zones;
-      state.lanes = data.lanes;
+      state = loadData(data, state);
     });
-
     builder.addCase(importLanes.fulfilled, (state, action) => {
       let mapSize = {
         width: Math.max(
@@ -761,6 +774,24 @@ export const mapManagementSlice = createSlice({
       // console.log(mapSize);
 
       state.map = { ...state.map, ...{ size: mapSize } };
+    });
+    builder.addCase(loadJson.fulfilled, (state, action) => {
+      state.zones = {};
+      state.lanes = {};
+      state.slots = {};
+
+      delete action.payload.shipToGroups;
+      let data = { ...state, ...action.payload };
+
+      state = loadData(data, state);
+    });
+
+    builder.addCase(pasteLanePriorites.fulfilled, (state, action) => {
+      let sourceKey = action.payload.source;
+      let destinationKey = action.payload.destination;
+      console.log(action.payload);
+
+      state.lanes[destinationKey].priorites = state.lanes[sourceKey].priorites;
     });
   },
 });

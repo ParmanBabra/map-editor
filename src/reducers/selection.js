@@ -5,6 +5,10 @@ export const selectionSlice = createSlice({
   name: "selection",
   initialState: {
     selections: [],
+    contents: {
+      type: "none",
+      value: "",
+    },
     isMap: false,
   },
   reducers: {
@@ -61,17 +65,28 @@ export const selectionSlice = createSlice({
         );
 
         if (collisions.checkCollision(boxRect, elementRect)) {
-          selecting.push({ id: element.key, type: element.type })
+          selecting.push({ id: element.key, type: element.type });
         }
       }
 
       state.selections = selecting;
     },
+
+    copyLanePriorites: (state, action) => {
+      state.contents.type = "LanePriorites";
+      state.contents.value = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { select, selectMap, clear, addSelect, selectWithRect } =
-  selectionSlice.actions;
+export const {
+  select,
+  selectMap,
+  clear,
+  addSelect,
+  selectWithRect,
+  copyLanePriorites,
+} = selectionSlice.actions;
 
 export default selectionSlice.reducer;
