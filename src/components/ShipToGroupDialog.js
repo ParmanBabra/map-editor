@@ -25,6 +25,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 750,
+  height: "80%",
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -55,7 +56,10 @@ export default function ShipToGroupDialog({ open, onClose }) {
             <Typography id="transition-modal-title" variant="h6" component="h2">
               Ship To Group List
             </Typography>
-            <TableContainer component={Paper}>
+            <TableContainer
+              component={Paper}
+              sx={{ height: "calc(100% - 30px)" }}
+            >
               <Table size="small" aria-label="simple table">
                 <TableHead>
                   <TableRow>

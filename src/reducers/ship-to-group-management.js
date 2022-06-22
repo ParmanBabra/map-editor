@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Papa from "papaparse";
 import localStorage from "local-storage";
 
+import { exportPriorites, exportShipToGroups } from "./../helper/export-zone";
+
 export const importShipToGroup = createAsyncThunk(
   "ship-to-group-management/import",
   async (file, thunkAPI) => {
@@ -16,17 +18,20 @@ export const importShipToGroup = createAsyncThunk(
   }
 );
 
-export const ExportSQL = createAsyncThunk(
+export const exportSql = createAsyncThunk(
   "ship-to-group-management/export-sql",
-  async (file, thunkAPI) => {
-    return new Promise((resolve, reject) => {
-      Papa.parse(file, {
-        header: true,
-        complete: (results) => {
-          resolve(results.data);
-        },
-      });
-    });
+  async (_, thunkAPI) => {
+    let { shipToGroups } = thunkAPI.getState().shipToGroupsManagement;
+    let { lanes, map } = thunkAPI.getState().mapManagement;
+
+    let sql = exportShipToGroups(shipToGroups, map);
+    let sql2 = exportPriorites(lanes, shipToGroups, map);
+
+    let resultSql = [...sql, ...sql2];
+
+    console.log(resultSql);
+    
+    return Promise.resolve(resultSql);
   }
 );
 

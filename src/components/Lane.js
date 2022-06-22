@@ -12,6 +12,9 @@ import "./Lane.css";
 export default function Lane(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
+  const shipToGroups = useSelector(
+    (state) => state.shipToGroupsManagement.shipToGroups
+  );
   const zone = useSelector(
     (state) => state.mapManagement.zones[props.lane.zone_id]
   );
@@ -21,6 +24,7 @@ export default function Lane(props) {
 
   const lane = { ...props.lane };
   const scale = props.scale;
+  const color = getShipToGroupColor(lane, shipToGroups);
 
   let classStyle = ["rect"];
 
@@ -34,6 +38,22 @@ export default function Lane(props) {
 
   if (map.freezingZone) {
     classStyle.push("react-freezing");
+  }
+
+  function getShipToGroupColor(_lane, _shipToGroups) {
+    let priorites = _.values(_lane.priorites);
+    let firstShipToGroup = null;
+
+    if (priorites.length > 0) {
+      const firstPriority = _.values(_lane.priorites)[0];
+      firstShipToGroup = _shipToGroups[firstPriority.shipToGroup];
+    }
+
+    if (firstShipToGroup) {
+      return firstShipToGroup.color;
+    } else {
+      return `#FFFFFF96`;
+    }
   }
 
   function snapGrid(grid2D, x, y) {
@@ -166,6 +186,9 @@ export default function Lane(props) {
       disableDragging={map.freezingLane || map.disableMove}
       enableResizing={!map.freezingLane || map.disableMove}
       className={classnames(classStyle)}
+      style={{
+        backgroundColor: map.showLaneRealColor ? `${color}` : `#FFFFFF96`,
+      }}
       bounds=".content"
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}

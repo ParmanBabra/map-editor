@@ -244,6 +244,17 @@ export default function MapProp(props) {
           }
           label="Show Zone Color"
         />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={map.showLaneRealColor}
+              onChange={(e) =>
+                updatePropBoolean(e.target.checked, "showLaneRealColor")
+              }
+            />
+          }
+          label="Show Lane Color"
+        />
       </Grid>
       <Grid item xs={12} sm={12} textAlign={"start"}>
         <FormControlLabel

@@ -262,6 +262,7 @@ export const mapManagementSlice = createSlice({
       freezingSlot: true,
       enableMove: true,
       showZoneRealColor: true,
+      showLaneRealColor: true,
       zoneTextSize: 20,
       makerSize: 60,
       updateBy: "nakarsat",

@@ -28,6 +28,7 @@ import {
   importShipToGroup,
   save,
   load,
+  exportSql as exportSqlShipToGroup,
 } from "./../reducers/ship-to-group-management";
 import { selectMap } from "./../reducers/selection";
 import selectFiles from "select-files";
@@ -76,6 +77,14 @@ export default function ToolsBar(props) {
 
   const handleClickExport = async () => {
     let sqls = await dispatch(exportSql());
+    handleCloseNavFile();
+
+    setOpenExport(true);
+    setExportSQLs(sqls.payload);
+  };
+
+  const handleClickShipToGroupExport = async () => {
+    let sqls = await dispatch(exportSqlShipToGroup());
     handleCloseNavFile();
 
     setOpenExport(true);
@@ -209,7 +218,9 @@ export default function ToolsBar(props) {
                 Save Json
               </MenuItem>
               <MenuItem onClick={(e) => handleClickOpenLoad()}>Load</MenuItem>
-              <MenuItem onClick={(e) => handleClickLoadJson()}>Load Json</MenuItem>
+              <MenuItem onClick={(e) => handleClickLoadJson()}>
+                Load Json
+              </MenuItem>
               <MenuItem onClick={(e) => handleClickLoadLanes()}>
                 Load Lanes CSV
               </MenuItem>
@@ -218,6 +229,9 @@ export default function ToolsBar(props) {
               </MenuItem>
               <Divider light />
               <MenuItem onClick={handleClickExport}>Export SQL</MenuItem>
+              <MenuItem onClick={handleClickShipToGroupExport}>
+                Export Ship To Group SQL
+              </MenuItem>
             </Menu>
 
             <Menu
@@ -309,6 +323,15 @@ export default function ToolsBar(props) {
               >
                 {renderVisibility(map.showZoneRealColor)}
                 Show Zone Color
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleUpdateMap(!map.showLaneRealColor, "showLaneRealColor");
+                }}
+              >
+                {renderVisibility(map.showLaneRealColor)}
+                Show Lane Color
               </MenuItem>
 
               <Divider light />

@@ -101,6 +101,7 @@ export default function ZoneProp(props) {
           label="Capacity"
           fullWidth
           size="small"
+          disabled
           value={zone.capacity}
           onChange={(e) => updateProp(e.target.value, "capacity")}
         />

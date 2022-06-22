@@ -227,16 +227,20 @@ export const exportTemplateZone = (template_zones, map, defaultValue) => {
         }, ${convertOriginYToOnboardY(zone.y + zone.labelLocationY, height)})'`,
       },
       progress_bar_rect: {
-        string: `box '((${zone.x + zone.progressX}, ${
-          convertOriginYToOnboardY(zone.y + zone.progressY, height)
-        }),(${zone.x + zone.progressX + zone.progressWidth}, ${
-          convertOriginYToOnboardY(zone.y + zone.progressY + zone.progressHeight, height)
-        }))'`,
+        string: `box '((${zone.x + zone.progressX}, ${convertOriginYToOnboardY(
+          zone.y + zone.progressY,
+          height
+        )}),(${
+          zone.x + zone.progressX + zone.progressWidth
+        }, ${convertOriginYToOnboardY(
+          zone.y + zone.progressY + zone.progressHeight,
+          height
+        )}))'`,
       },
       mark_location: {
-        string: `point '(${zone.x + zone.markLocationX}, ${
-          convertOriginYToOnboardY(zone.y + zone.markLocationY, height)
-        })'`,
+        string: `point '(${
+          zone.x + zone.markLocationX
+        }, ${convertOriginYToOnboardY(zone.y + zone.markLocationY, height)})'`,
       },
       colour: zone.color,
       colour_text: zone.labelColor,
@@ -365,6 +369,8 @@ export const exportMapInfo = (map) => {
     is_request_forklift_gr_sto_po: map.isRequestForkliftGRStoPo,
     is_request_forklift_gi: map.isRequestForkliftGI,
     is_tracking_location: map.isTrackingLocation,
+    label_font_size: map.zoneTextSize,
+    mark_size: map.makerSize,
   };
 
   let sql = generateSQLPerRow(row, ["id", "warehouse_id"], "tbm_map");
@@ -617,4 +623,111 @@ export const calculateSlotCountLane = (zone, lane, all_slots) => {
   results += slotsInLane.length;
 
   return results;
+};
+
+export const exportPriorites = (all_lanes, all_shipToGroups, map) => {
+  const rows = [];
+  const lanes = _.values(all_lanes);
+  const shipToGroups = _.values(all_shipToGroups);
+  const priorityTypes = ["10", "20"];
+
+  for (const lane of lanes) {
+    let priorites = _.orderBy(_.values(lane.priorites), (x) => x.key);
+    let priorityIndex = 1;
+
+    let shipToGroupAndPriorityType = [];
+
+    for (const priority of priorites) {
+      if (!priority.shipToGroup || priority.shipToGroup === "") {
+        continue;
+      }
+
+      let row = {
+        zone_id: lane.zone_id,
+        ship_to_group: priority.shipToGroup,
+        priority: priorityIndex,
+        map_id: map.id,
+        warehouse_id: map.warehouseId,
+        load_type: priority.type,
+        lane_id: lane.id,
+      };
+
+      let sql = generateSQLPerRow(
+        row,
+        [
+          "zone_id",
+          "ship_to_group",
+          "map_id",
+          "warehouse_id",
+          "load_type",
+          "lane_id",
+        ],
+        "cip_tbm_ship_to_group_map_zone"
+      );
+      rows.push(sql);
+      shipToGroupAndPriorityType.push(
+        `${priority.shipToGroup}_${priority.type}`
+      );
+
+      priorityIndex++;
+    }
+
+    for (const shipToGroup of shipToGroups) {
+      for (const priorityType of priorityTypes) {
+        let shipToGroupAndPriorityTypeKey = `${shipToGroup.id}_${priorityType}`;
+
+        if (shipToGroupAndPriorityType.includes(shipToGroupAndPriorityTypeKey))
+          continue;
+
+        let row = {
+          zone_id: lane.zone_id,
+          ship_to_group: shipToGroup.id,
+          priority: 99,
+          map_id: map.id,
+          warehouse_id: map.warehouseId,
+          load_type: priorityType,
+          lane_id: lane.id,
+        };
+
+        let sql = generateSQLPerRow(
+          row,
+          [
+            "zone_id",
+            "ship_to_group",
+            "map_id",
+            "warehouse_id",
+            "load_type",
+            "lane_id",
+          ],
+          "cip_tbm_ship_to_group_map_zone"
+        );
+        rows.push(sql);
+      }
+    }
+  }
+  return rows;
+};
+
+export const exportShipToGroups = (all_shipToGroups, map) => {
+  const rows = [];
+  const shipToGroups = _.values(all_shipToGroups);
+
+  for (const shipToGroup of shipToGroups) {
+    let row = {
+      id: shipToGroup.id,
+      description: shipToGroup.name,
+      createdate: getSQLDate(Date()),
+      createby: map.updateBy,
+      updatedate: getSQLDate(Date()),
+      updateby: map.updateBy,
+      is_active: true,
+      warehouse_id: map.warehouseId,
+      colour: shipToGroup.color,
+    };
+
+    let sql = generateSQLPerRow(row, ["id"], "tbm_ship_to_group");
+    rows.push(sql);
+  }
+
+  return rows;
 };

@@ -280,8 +280,8 @@ export default function Zone(props) {
       className={classnames(classStyle)}
       style={{
         backgroundColor: map.showZoneRealColor
-          ? `${zone.color}FF`
-          : `${zone.color}96`,
+          ? `${zone.color}`
+          : `#FFFFFF96`,
       }}
       bounds=".content"
       dragGrid={map.snapGrid}
