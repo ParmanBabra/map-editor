@@ -1,7 +1,7 @@
 import React from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
@@ -13,6 +13,9 @@ import Typography from "@mui/material/Typography";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormLabel from "@mui/material/FormLabel";
+import IconButton from "@mui/material/IconButton";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import { ColorField } from "./ColorField";
 import _ from "lodash";
 
@@ -22,7 +25,10 @@ import {
   makerToCenter,
   progressAdjust,
   updateLanesOfZone,
+  pasteZoneProperties,
 } from "./../reducers/map-management";
+import { copyZoneProperties } from "./../reducers/selection";
+import { ContentType } from "./../helper/constants";
 
 import "./PropertyEditor.css";
 
@@ -30,6 +36,7 @@ export default function ZoneProp(props) {
   let zone = props.selecting;
 
   const dispatch = useDispatch();
+  const contantsType = useSelector((state) => state.selection.contents.type);
   // const [x, setX] = useState(zone?.x);
 
   function updateProp(value, propName) {
@@ -55,10 +62,27 @@ export default function ZoneProp(props) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item sm={12} textAlign={"start"}>
+      <Grid item sm={8} textAlign={"start"}>
         <Typography variant="h5" component="h5">
           Zone Property
         </Typography>
+      </Grid>
+      <Grid item sm={4} textAlign={"end"}>
+        <IconButton
+          onClick={(e) => {
+            dispatch(copyZoneProperties(zone.key));
+          }}
+        >
+          <ContentCopyIcon />
+        </IconButton>
+        <IconButton
+          disabled={contantsType !== ContentType.ZoneProperties}
+          onClick={(e) => {
+            dispatch(pasteZoneProperties(zone.key));
+          }}
+        >
+          <ContentPasteIcon />
+        </IconButton>
       </Grid>
       <Grid item sm={12}>
         <FormControl fullWidth>

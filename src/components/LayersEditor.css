@@ -1,0 +1,11 @@
+.layers-editor {
+  position: fixed;
+  left: 10px;
+  top: 90px;
+  max-width: 350px;
+  opacity: 0.5;
+}
+
+.layers-editor:hover {
+  opacity: 0.9;
+}

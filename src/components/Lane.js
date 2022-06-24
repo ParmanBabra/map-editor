@@ -9,6 +9,8 @@ import { select, addSelect } from "./../reducers/selection";
 
 import "./Lane.css";
 
+import { rectBorder } from "./../helper/constants";
+
 export default function Lane(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
@@ -19,12 +21,14 @@ export default function Lane(props) {
     (state) => state.mapManagement.zones[props.lane.zone_id]
   );
   const keys = useSelector((state) => state.keyboard.keys);
+  const zoomPercent = useSelector((state) => state.selection.zoom.percent);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const lane = { ...props.lane };
   const scale = props.scale;
   const color = getShipToGroupColor(lane, shipToGroups);
+  let borderWidth = 1;
 
   let classStyle = ["rect"];
 
@@ -33,6 +37,8 @@ export default function Lane(props) {
       return o.id === lane.key && o.type === "lane";
     })
   ) {
+    borderWidth =
+      (rectBorder.max - rectBorder.min) * (1 - zoomPercent) + rectBorder.min;
     classStyle.push("rect-selected");
   }
 
@@ -50,7 +56,7 @@ export default function Lane(props) {
     }
 
     if (firstShipToGroup) {
-      return firstShipToGroup.color;
+      return `${firstShipToGroup.color}AA`;
     } else {
       return `#FFFFFF96`;
     }
@@ -187,6 +193,7 @@ export default function Lane(props) {
       enableResizing={!map.freezingLane || map.disableMove}
       className={classnames(classStyle)}
       style={{
+        borderWidth: `${borderWidth}px`,
         backgroundColor: map.showLaneRealColor ? `${color}` : `#FFFFFF96`,
       }}
       bounds=".content"
@@ -222,7 +229,15 @@ export default function Lane(props) {
       onClick={(e) => handleOnSelect(e)}
       ref={radRef}
     >
-      <svg className="item-area" width="100%" height="100%">
+      <svg
+        className="item-area"
+        style={{
+          marginTop: `-${borderWidth}px`,
+          marginLeft: `-${borderWidth * 2}px`,
+        }}
+        width="100%"
+        height="100%"
+      >
         {renderSlot(map, zone, rectSlot)}
 
         <text x="10" y="20" className="small">

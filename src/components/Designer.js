@@ -16,7 +16,11 @@ import {
   deleteSlots,
   addZoneWithSelections,
 } from "./../reducers/map-management";
-import { clear, selectWithRect } from "./../reducers/selection";
+import {
+  clear,
+  selectWithRect,
+  updateZoomScale,
+} from "./../reducers/selection";
 
 import Grid from "./Grid";
 import "./Designer.css";
@@ -28,10 +32,12 @@ export default function Designer(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
+  const layers = useSelector((state) => state.mapManagement.layers);
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
   const mouse = useSelector((state) => state.keyboard.mouse);
   const selections = useSelector((state) => state.selection.selections);
+  const currentLayer = useSelector((state) => state.selection.currentLayer);
 
   const [zoomInformation, setZoomInformation] = useState({
     scale: 1,
@@ -52,103 +58,16 @@ export default function Designer(props) {
   const mapSize = map.size;
 
   function handleAddZone() {
-    dispatch(addZone());
+    dispatch(addZone({ currentLayer }));
   }
 
   function handleAddLane() {
-    dispatch(addLane());
+    dispatch(addLane({ currentLayer }));
   }
 
   function handleGroupZone() {
-    dispatch(addZoneWithSelections(selections));
+    dispatch(addZoneWithSelections({ selections, layer: currentLayer }));
   }
-
-  // const handleMouseDown = (e) => {
-  //   if (e.buttons !== 1) return;
-
-  //   setSelectRect({
-  //     x1: e.nativeEvent.offsetX,
-  //     y1: e.nativeEvent.offsetY,
-  //     x2: e.nativeEvent.offsetX,
-  //     y2: e.nativeEvent.offsetY,
-  //   });
-  //   setDragging(true);
-  //   return true;
-  // };
-  // const handleMouseMove = (e) => {
-  //   if (!dragging) return; //Not Start
-
-  //   setSelectRect({
-  //     x1: selectRect.x1,
-  //     y1: selectRect.y1,
-  //     x2: e.nativeEvent.offsetX,
-  //     y2: e.nativeEvent.offsetY,
-  //   });
-  //   return true;
-  // };
-  // const handleMouseUp = (e) => {
-  //   let zoneElements = _.map(zones, (item) => ({
-  //     key: item.key,
-  //     id: item.id,
-  //     type: item.type,
-  //     x: item.x,
-  //     y: item.y,
-  //     width: item.width,
-  //     height: item.height,
-  //   }));
-
-  //   let laneElements = _.map(lanes, (item) => ({
-  //     key: item.key,
-  //     id: item.id,
-  //     type: item.type,
-  //     x: item.x,
-  //     y: item.y,
-  //     width: item.width,
-  //     height: item.height,
-  //   }));
-
-  //   let slotElements = _.map(slots, (item) => ({
-  //     key: item.key,
-  //     id: item.id,
-  //     type: item.type,
-  //     x: item.x,
-  //     y: item.y,
-  //     width: item.width,
-  //     height: item.height,
-  //   }));
-
-  //   let rect = {
-  //     x: Math.min(selectRect.x1, selectRect.x2),
-  //     y: Math.min(selectRect.y1, selectRect.y2),
-  //     width:
-  //       Math.max(selectRect.x1, selectRect.x2) -
-  //       Math.min(selectRect.x1, selectRect.x2),
-  //     height:
-  //       Math.max(selectRect.y1, selectRect.y2) -
-  //       Math.min(selectRect.y1, selectRect.y2),
-  //   };
-
-  //   let elements = _.union(zoneElements, laneElements, slotElements);
-
-  //   if (rect.width !== 0 && rect.height !== 0) {
-  //     dispatch(
-  //       selectWithRect({
-  //         elements: elements,
-  //         rect: rect,
-  //       })
-  //     );
-  //   }
-
-  //   setSelectRect({
-  //     x1: null,
-  //     y1: null,
-  //     x2: null,
-  //     y2: null,
-  //   });
-
-  //   setDragging(false);
-  //   return true;
-  // };
 
   function renderGrid() {
     if (map.showGrid) {
@@ -156,58 +75,41 @@ export default function Designer(props) {
     }
   }
 
-  function renderZones(zones, map) {
+  function renderZones(zones, layers, map) {
     if (!map.showZone) return;
 
     return _.map(zones, (zone) => {
+      if (!layers[zone.layer].visible) return;
+
       return (
         <Zone key={zone.id} zone={zone} scale={zoomInformation.scale}></Zone>
       );
     });
   }
 
-  function renderLanes(lanes, map) {
+  function renderLanes(lanes, layers, map) {
     if (!map.showLane) return;
 
     return _.map(lanes, (lane) => {
+      if (!layers[lane.layer].visible) return;
+
       return (
         <Lane key={lane.key} lane={lane} scale={zoomInformation.scale}></Lane>
       );
     });
   }
 
-  function renderSlots(slots, map) {
+  function renderSlots(slots, layers, map) {
     if (!map.showSlot) return;
 
     return _.map(slots, (slot) => {
+      if (!layers[slot.layer].visible) return;
+
       return (
         <Slot key={slot.key} slot={slot} scale={zoomInformation.scale}></Slot>
       );
     });
   }
-
-  // function renderSelectRect() {
-  //   if (!dragging) return;
-
-  //   return (
-  //     <Fragment>
-  //       <div
-  //         className="selection-rect"
-  //         onMouseUp={handleMouseUp}
-  //         style={{
-  //           top: Math.min(selectRect.y1, selectRect.y2),
-  //           left: Math.min(selectRect.x1, selectRect.x2),
-  //           width:
-  //             Math.max(selectRect.x1, selectRect.x2) -
-  //             Math.min(selectRect.x1, selectRect.x2),
-  //           height:
-  //             Math.max(selectRect.y1, selectRect.y2) -
-  //             Math.min(selectRect.y1, selectRect.y2),
-  //         }}
-  //       ></div>
-  //     </Fragment>
-  //   );
-  // }
 
   useEffect(() => {
     if (keys["Delete"]) {
@@ -240,6 +142,10 @@ export default function Designer(props) {
       setCanPanning(true);
     }
   }, [mouse, dispatch]);
+
+  useEffect(() => {
+    dispatch(updateZoomScale(zoomInformation.scale));
+  }, [zoomInformation]);
 
   return (
     <div id="map">
@@ -275,11 +181,11 @@ export default function Designer(props) {
 
           {renderGrid()}
 
-          {renderZones(zones, map)}
+          {renderZones(zones, layers, map)}
 
-          {renderLanes(lanes, map)}
+          {renderLanes(lanes, layers, map)}
 
-          {renderSlots(slots, map)}
+          {renderSlots(slots, layers, map)}
 
           {/* {renderSelectRect()} */}
 

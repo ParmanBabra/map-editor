@@ -30,7 +30,8 @@ import {
   load,
   exportSql as exportSqlShipToGroup,
 } from "./../reducers/ship-to-group-management";
-import { selectMap } from "./../reducers/selection";
+import { selectMap, changeEditorMode } from "./../reducers/selection";
+import { EditorMode } from "./../helper/constants";
 import selectFiles from "select-files";
 
 import LoadLocalDialog from "./LoadLocalDialog";
@@ -39,9 +40,11 @@ import ShipToGroupDialog from "./ShipToGroupDialog";
 
 export default function ToolsBar(props) {
   const map = useSelector((state) => state.mapManagement.map);
+  const currentLayer = useSelector((state) => state.selection.currentLayer);
 
   const [anchorElFile, setAnchorElFile] = useState(null);
   const [anchorElMap, setAnchorElMap] = useState(null);
+  const [anchorElEditor, setAnchorElEditor] = useState(null);
 
   const [openExport, setOpenExport] = useState(false);
   const [exportSQLs, setExportSQLs] = useState([]);
@@ -73,6 +76,14 @@ export default function ToolsBar(props) {
 
   const handleCloseNavMap = () => {
     setAnchorElMap(null);
+  };
+
+  const handleOpenNavEditor = (event) => {
+    setAnchorElEditor(event.currentTarget);
+  };
+
+  const handleCloseNavEditor = () => {
+    setAnchorElEditor(null);
   };
 
   const handleClickExport = async () => {
@@ -125,7 +136,7 @@ export default function ToolsBar(props) {
     setAnchorElFile(null);
     let files = await selectFiles({ accept: ".csv" });
 
-    dispatch(importLanes(files[0]));
+    dispatch(importLanes({ file: files[0], layer: currentLayer }));
   };
 
   const handleClickLoadShipToGroups = async () => {
@@ -181,6 +192,13 @@ export default function ToolsBar(props) {
               onClick={handleOpenNavMap}
             >
               Map
+            </Button>
+
+            <Button
+              sx={{ color: "white", display: "block" }}
+              onClick={handleOpenNavEditor}
+            >
+              Editors
             </Button>
 
             <Menu
@@ -369,6 +387,30 @@ export default function ToolsBar(props) {
               >
                 {rendeFreezing(map.disableMove)}
                 Disable Move
+              </MenuItem>
+            </Menu>
+
+            <Menu
+              anchorEl={anchorElEditor}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElEditor)}
+              onClose={handleCloseNavEditor}
+            >
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseNavEditor();
+                  dispatch(changeEditorMode(EditorMode.Layers));
+                }}
+              >
+                Layers Editors
               </MenuItem>
             </Menu>
           </Box>

@@ -3,10 +3,11 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
+
 import Designer from "./components/Designer";
 import ToolsBar from "./components/ToolsBar";
 import PropertyEditor from "./components/PropertyEditor";
-
+import LayersEditor from "./components/LayersEditor";
 
 import { up, down, mouseDown, mouseUp } from "./reducers/keyboard-management";
 
@@ -46,7 +47,7 @@ function App() {
       <ToolsBar />
       <Designer />
       <PropertyEditor />
-      
+      <LayersEditor />
     </div>
   );
 }

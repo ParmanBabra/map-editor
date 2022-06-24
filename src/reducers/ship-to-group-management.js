@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Papa from "papaparse";
 import localStorage from "local-storage";
 
+import { loadJson } from "./map-management";
+
 import { exportPriorites, exportShipToGroups } from "./../helper/export-zone";
 
 export const importShipToGroup = createAsyncThunk(
@@ -30,7 +32,6 @@ export const exportSql = createAsyncThunk(
     let resultSql = [...sql, ...sql2];
 
     console.log(resultSql);
-    
     return Promise.resolve(resultSql);
   }
 );
@@ -61,6 +62,12 @@ export const shipToGroupsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(loadJson.fulfilled, (state, action) => {
+      let { ship_to_groups } = action.payload;
+      if (!ship_to_groups) ship_to_groups = {};
+
+      state.shipToGroups = ship_to_groups;
+    });
     builder.addCase(importShipToGroup.fulfilled, (state, action) => {
       for (const shipToGroupInfo of action.payload) {
         if (!shipToGroupInfo.id) continue;
@@ -68,7 +75,7 @@ export const shipToGroupsSlice = createSlice({
         const shipToGroup = {
           id: shipToGroupInfo.id,
           name: shipToGroupInfo.description,
-          color: "#FFFFFF",
+          color: shipToGroupInfo.color,
         };
 
         state.shipToGroups[shipToGroup.id] = shipToGroup;

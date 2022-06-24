@@ -36,9 +36,11 @@ import {
   deletePriority,
   updatePriority,
   pasteLanePriorites,
+  pasteLaneProperties,
 } from "./../reducers/map-management";
+import { ContentType } from "./../helper/constants";
 
-import { copyLanePriorites } from "./../reducers/selection";
+import { copyLanePriorites, copyLaneProperties } from "./../reducers/selection";
 
 import "./PropertyEditor.css";
 
@@ -60,9 +62,7 @@ export default function LaneProp(props) {
     (state) => state.shipToGroupsManagement.shipToGroups
   );
 
-  const hasLanePriorites = useSelector(
-    (state) => state.selection.contents.type === "LanePriorites"
-  );
+  const contantsType = useSelector((state) => state.selection.contents.type);
 
   let lane = props.selecting;
   let priorites = _.values(lane.priorites);
@@ -95,10 +95,27 @@ export default function LaneProp(props) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item sm={12} textAlign={"start"}>
+      <Grid item sm={8} textAlign={"start"}>
         <Typography variant="h5" component="h5">
           Lane Property
         </Typography>
+      </Grid>
+      <Grid item sm={4} textAlign={"end"}>
+        <IconButton
+          onClick={(e) => {
+            dispatch(copyLaneProperties(lane.key));
+          }}
+        >
+          <ContentCopyIcon />
+        </IconButton>
+        <IconButton
+          disabled={contantsType !== ContentType.LaneProperties}
+          onClick={(e) => {
+            dispatch(pasteLaneProperties(lane.key));
+          }}
+        >
+          <ContentPasteIcon />
+        </IconButton>
       </Grid>
 
       <Grid item xs={12} sm={6}>
@@ -198,19 +215,20 @@ export default function LaneProp(props) {
         </Typography>
       </Grid>
       <Grid item sm={8} textAlign={"end"}>
-        <IconButton>
-          <ContentCopyIcon
-            onClick={(e) => {
-              dispatch(copyLanePriorites(lane.key));
-            }}
-          />
+        <IconButton
+          onClick={(e) => {
+            dispatch(copyLanePriorites(lane.key));
+          }}
+        >
+          <ContentCopyIcon />
         </IconButton>
-        <IconButton disabled={!hasLanePriorites}>
-          <ContentPasteIcon
-            onClick={(e) => {
-              dispatch(pasteLanePriorites(lane.key));
-            }}
-          />
+        <IconButton
+          disabled={contantsType !== ContentType.LanePriorites}
+          onClick={(e) => {
+            dispatch(pasteLanePriorites(lane.key));
+          }}
+        >
+          <ContentPasteIcon />
         </IconButton>
         <IconButton
           onClick={(e) => {
@@ -297,7 +315,7 @@ export default function LaneProp(props) {
                                   )}
                                   value={item.id}
                                 >
-                                  {item.name}
+                                  [{item.id}] {item.name}
                                 </MenuItem>
                               );
                             })}

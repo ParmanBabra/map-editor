@@ -5,6 +5,8 @@ import classnames from "classnames";
 import _ from "lodash";
 import Color from "color";
 
+import { rectBorder } from "./../helper/constants";
+
 import { updateZone, updateLanesOfZone } from "./../reducers/map-management";
 import { select, addSelect } from "./../reducers/selection";
 
@@ -14,11 +16,13 @@ export default function Zone(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
+  const zoomPercent = useSelector((state) => state.selection.zoom.percent);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const zone = { ...props.zone };
   const scale = props.scale;
+  let borderWidth = 1;
 
   let classStyle = ["rect"];
 
@@ -27,6 +31,8 @@ export default function Zone(props) {
       return o.id === zone.id && o.type === "zone";
     })
   ) {
+    borderWidth =
+      (rectBorder.max - rectBorder.min) * (1 - zoomPercent) + rectBorder.min;
     classStyle.push("rect-selected");
   }
 
@@ -279,9 +285,8 @@ export default function Zone(props) {
       enableResizing={!map.freezingZone || map.disableMove}
       className={classnames(classStyle)}
       style={{
-        backgroundColor: map.showZoneRealColor
-          ? `${zone.color}`
-          : `#FFFFFF96`,
+        borderWidth: `${borderWidth}px`,
+        backgroundColor: map.showZoneRealColor ? `${zone.color}` : `#FFFFFF96`,
       }}
       bounds=".content"
       dragGrid={map.snapGrid}
@@ -316,7 +321,15 @@ export default function Zone(props) {
       onClick={(e) => handleOnSelect(e)}
       ref={radRef}
     >
-      <svg className="item-area" width="100%" height="100%">
+      <svg
+        className="item-area"
+        style={{
+          marginTop: `-${borderWidth}px`,
+          marginLeft: `-${borderWidth * 2}px`,
+        }}
+        width="100%"
+        height="100%"
+      >
         {renderSlot(map, rectSlot)}
         {renderLane(map, lineLane)}
         {zone.localtionType === "storage" ? renderWalls(map, zone) : null}

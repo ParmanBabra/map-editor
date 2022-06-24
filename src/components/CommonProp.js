@@ -8,6 +8,7 @@ import {
   updateZone,
   updateLane,
   updateSlot,
+  updateZoneOfLane,
 } from "./../reducers/map-management";
 
 import "./PropertyEditor.css";
@@ -29,6 +30,10 @@ export default function CommonProp(props) {
       dispatch(updateZone(currentElement));
     } else if (currentElement.type === "lane") {
       dispatch(updateLane(currentElement));
+
+      if (currentElement.autoAdjustZone) {
+        dispatch(updateZoneOfLane(currentElement.key));
+      }
     } else {
       dispatch(updateSlot(currentElement));
     }

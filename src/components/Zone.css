@@ -8,12 +8,16 @@
 }
 
 .rect-selected {
-  border: rgb(255, 0, 0, 0.5) solid 1px;
+  border-color: rgb(255, 0, 0, 0.5);
+  border-style: solid;
+  border-width: 2px;
   box-sizing: content-box;
 }
 
 .rect-selected:hover {
-  border: rgba(160, 0, 0, 0.5) solid 1px;
+  border-color: rgba(160, 0, 0, 0.5);
+  border-style: solid;
+  border-width: 2px;
 }
 
 .react-draggable-dragging {
@@ -35,6 +39,7 @@
 
 .item-area {
   overflow: visible;
+  position: relative;
 }
 
 .wall {

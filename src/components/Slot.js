@@ -9,16 +9,20 @@ import { select, addSelect } from "./../reducers/selection";
 
 import "./Slot.css";
 
+import { rectBorder } from "./../helper/constants";
+
 export default function Slot(props) {
   const selections = useSelector((state) => state.selection.selections);
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
+  const zoomPercent = useSelector((state) => state.selection.zoom.percent);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const slot = { ...props.slot };
   const scale = props.scale;
 
+  let borderWidth = 1;
   let classStyle = ["rect"];
 
   if (
@@ -26,6 +30,8 @@ export default function Slot(props) {
       return o.id === slot.key && o.type === "slot";
     })
   ) {
+    borderWidth =
+      (rectBorder.max - rectBorder.min) * (1 - zoomPercent) + rectBorder.min;
     classStyle.push("rect-selected");
   }
 
@@ -86,6 +92,9 @@ export default function Slot(props) {
       enableResizing={!map.freezingSlot || map.disableMove}
       className={classnames(classStyle)}
       bounds=".content"
+      style={{
+        borderWidth: `${borderWidth}px`,
+      }}
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}
       default={{
@@ -119,7 +128,15 @@ export default function Slot(props) {
       onClick={(e) => handleOnSelect(e)}
       ref={radRef}
     >
-      <svg className="item-area" width="100%" height="100%">
+      <svg
+        className="item-area"
+        style={{
+          marginTop: `-${borderWidth}px`,
+          marginLeft: `-${borderWidth * 2}px`,
+        }}
+        width="100%"
+        height="100%"
+      >
         <text x="10" y="20" className="small">
           Slot : {slot.name}
         </text>

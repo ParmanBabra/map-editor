@@ -17,6 +17,8 @@ import {
   calculateSlotCountZone,
   calculateSlotCountLane,
 } from "./../helper/export-zone";
+import { ContentType, defaultZone, defaultLane } from "./../helper/constants";
+import { selectionToCurrentLayer } from "./selection";
 import { TxtReader } from "txt-reader";
 import Papa from "papaparse";
 
@@ -39,7 +41,7 @@ export const saveJson = createAsyncThunk(
     delete data.mapList;
 
     let shipToGroups = thunkAPI.getState().shipToGroupsManagement.shipToGroups;
-    data.shipToGroups = shipToGroups;
+    data["ship_to_groups"] = shipToGroups;
 
     await downloadFile(data, `WH_${data.map.warehouseId}-MAP_${data.map.name}`);
   }
@@ -49,7 +51,9 @@ export const loadJson = createAsyncThunk(
   "map-management/load-json",
   async (file, thunkAPI) => {
     let text = await file.text();
-    return JSON.parse(text);
+    const results = JSON.parse(text);
+
+    return results;
   }
 );
 
@@ -72,12 +76,12 @@ export const exportSql = createAsyncThunk(
 
 export const importLanes = createAsyncThunk(
   "map-management/import-lanes",
-  async (file, thunkAPI) => {
+  async ({ file, layer }, thunkAPI) => {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
         complete: (results) => {
-          resolve(results.data);
+          resolve({ lanes: results.data, layer });
         },
       });
     });
@@ -90,9 +94,40 @@ export const pasteLanePriorites = createAsyncThunk(
     let { contents, selections } = thunkAPI.getState().selection;
 
     if (selections.length < 1) return;
-    if (contents.type !== "LanePriorites") return;
+    if (contents.type !== ContentType.LanePriorites) return;
 
     return { source: contents.value, destination: destinationKey };
+  }
+);
+
+export const pasteLaneProperties = createAsyncThunk(
+  "map-management/paste-lanes-properties",
+  async (destinationKey, thunkAPI) => {
+    let { contents, selections } = thunkAPI.getState().selection;
+
+    if (selections.length < 1) return;
+    if (contents.type !== ContentType.LaneProperties) return;
+
+    return { source: contents.value, destination: destinationKey };
+  }
+);
+
+export const pasteZoneProperties = createAsyncThunk(
+  "map-management/paste-zones-properties",
+  async (destinationKey, thunkAPI) => {
+    let { contents, selections } = thunkAPI.getState().selection;
+
+    if (selections.length < 1) return;
+    if (contents.type !== ContentType.ZoneProperties) return;
+
+    return { source: contents.value, destination: destinationKey };
+  }
+);
+
+export const deleteLayer = createAsyncThunk(
+  "map-management/delete-layer",
+  async (layer, thunkAPI) => {
+    return layer;
   }
 );
 
@@ -100,20 +135,7 @@ const loadData = (data, state) => {
   for (const key in data.zones) {
     let zone = data.zones[key];
     zone = {
-      ...{
-        color: "#FFFFFF",
-        labelLocationX: 10,
-        labelLocationY: 20,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
-      },
+      ...defaultZone,
       ...zone,
     };
     data.zones[key] = zone;
@@ -122,14 +144,9 @@ const loadData = (data, state) => {
   for (const key in data.lanes) {
     let lane = data.lanes[key];
     lane = {
+      ...defaultLane,
       ...{
-        priorites: {},
-        autoAdjustZone: true,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        localtionType: "storage",
         slotWidth: data.default.slotWidth,
-        capacity: 0,
       },
       ...lane,
     };
@@ -149,103 +166,47 @@ export const mapManagementSlice = createSlice({
   initialState: {
     zones: {
       1: {
-        key: 1,
-        id: 1,
-        name: "A1",
-        type: "zone",
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 200,
-        laneDirection: "Vertical",
-        laneWidth: 50,
-        slotWidth: 50,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        isConveyor: false,
-        capacity: 0,
-        localtionType: "storage",
-        color: "#FFFFFF",
-        labelLocationX: 0,
-        labelLocationY: 0,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
+        ...defaultZone,
+        ...{
+          key: 1,
+          id: 1,
+          name: "A1",
+        },
       },
       2: {
-        key: 2,
-        id: 2,
-        name: "A2",
-        type: "zone",
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 200,
-        laneDirection: "Vertical",
-        laneWidth: 50,
-        slotWidth: 50,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        isConveyor: false,
-        capacity: 0,
-        localtionType: "storage",
-        color: "#FFFFFF",
-        labelLocationX: 0,
-        labelLocationY: 0,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
+        ...defaultZone,
+        ...{
+          key: 2,
+          id: 2,
+          name: "A2",
+        },
       },
       3: {
-        key: 3,
-        id: 3,
-        name: "A3",
-        type: "zone",
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 200,
-        laneDirection: "Horizontal",
-        laneWidth: 50,
-        slotWidth: 50,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        isConveyor: false,
-        capacity: 0,
-        localtionType: "storage",
-        color: "#FFFFFF",
-        labelLocationX: 0,
-        labelLocationY: 0,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
+        ...defaultZone,
+        ...{
+          key: 3,
+          id: 3,
+          name: "A3",
+        },
       },
     },
     slots: {},
     lanes: {},
+    layers: {
+      1: {
+        key: 1,
+        name: `Layer 1`,
+        visible: true,
+        editable: true,
+        isDefault: true,
+      },
+    },
     map: {
       id: "A",
       name: "A",
       warehouseId: 2,
       zoneRunning: 3,
+      layerRunning: 1,
       snapGrid: [10, 10],
       size: {
         width: 1000,
@@ -319,7 +280,7 @@ export const mapManagementSlice = createSlice({
       zones = collisionBox(lane, zones);
 
       if (zones.length > 0) {
-        let zone = zones[0];
+        let zone = _.orderBy(zones, (x) => x.area, "desc")[0];
         lane.zone_id = zone.id;
 
         let lanesInZone = _.values(state.lanes).filter(
@@ -375,6 +336,8 @@ export const mapManagementSlice = createSlice({
       let collisionLane = [];
 
       for (const laneInfo of lanesInZone) {
+        if (laneInfo.percentOverlap < 0.9) continue;
+
         let lane = state.lanes[laneInfo.id];
         collisionLane.push(lane);
       }
@@ -411,65 +374,41 @@ export const mapManagementSlice = createSlice({
       }
     },
     addZone: (state, action) => {
+      let { currentLayer } = action.payload;
+
       state.map.zoneRunning++;
       const id = state.map.zoneRunning;
       const zone = {
-        key: id,
-        id: id,
-        name: format(state.default.zoneNameFormat, state.map.name, id),
-        type: "zone",
-        x: 0,
-        y: 0,
-        width: 320,
-        height: 200,
-        laneDirection: "Vertical",
-        laneWidth: state.default.laneWidth,
-        slotWidth: state.default.slotWidth,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        isConveyor: false,
-        capacity: 0,
-        localtionType: "storage",
-        color: "#FFFFFF",
-        labelLocationX: 0,
-        labelLocationY: 0,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
+        ...defaultZone,
+        ...{
+          key: id,
+          id: id,
+          name: format(state.default.zoneNameFormat, state.map.name, id),
+          laneWidth: state.default.laneWidth,
+          slotWidth: state.default.slotWidth,
+          layer: currentLayer,
+        },
       };
       state.zones[id] = zone;
     },
     addLane: (state, action) => {
+      let { currentLayer } = action.payload;
+
       const lane = {
-        key: uuidv4(),
-        id: null,
-        name: format(state.default.laneNameFormat, state.map.name, 0, 0),
-        zone_id: null,
-        x: 0,
-        y: 0,
-        width: 50,
-        height: 200,
-        slotWidth: state.default.slotWidth,
-        autoAdjustZone: true,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        capacity: 0,
-        localtionType: "storage",
-        type: "lane",
-        priorites: {},
+        ...defaultLane,
+        ...{
+          key: uuidv4(),
+          name: format(state.default.laneNameFormat, state.map.name, 0, 0),
+          slotWidth: state.default.slotWidth,
+          layer: currentLayer,
+        },
       };
 
       state.lanes[lane.key] = lane;
     },
     addPriority: (state, action) => {
       let lane = state.lanes[action.payload];
-      let key = (new Date()).getTime();
+      let key = new Date().getTime();
 
       lane.priorites[key] = { key: key, shipToGroup: null, type: null };
     },
@@ -515,8 +454,33 @@ export const mapManagementSlice = createSlice({
       state.default = action.payload;
     },
 
+    toggleLayerVisible: (state, action) => {
+      let layer = state.layers[action.payload];
+      state.layers[layer.key].visible = !layer.visible;
+    },
+
+    toggleLayerEditable: (state, action) => {
+      let layer = state.layers[action.payload];
+      state.layers[layer.key].editable = !layer.editable;
+    },
+
+    addLayer: (state, action) => {
+      state.map.layerRunning += 1;
+
+      const layer = {
+        key: new Date().getTime(),
+        name: `Layer ${state.map.layerRunning}`,
+        visible: true,
+        editable: true,
+        isDefault: false,
+      };
+
+      state.layers[layer.key] = layer;
+    },
+
     addZoneWithSelections: (state, action) => {
-      if (action.payload.length === 0) return;
+      let { selections, layer } = action.payload;
+      if (selections.length === 0) return;
 
       let mapState = state;
       let p1 = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
@@ -527,7 +491,7 @@ export const mapManagementSlice = createSlice({
 
       mapState.map.zoneRunning++;
       const zoneId = mapState.map.zoneRunning;
-      for (const selection of action.payload) {
+      for (const selection of selections) {
         switch (selection.type) {
           case "slot":
             // const slot = state.slots[selection.id];
@@ -570,39 +534,25 @@ export const mapManagementSlice = createSlice({
         maxSize.width > maxSize.height ? "Horizontal" : "Vertical";
 
       const zone = {
-        key: zoneId,
-        id: zoneId,
-        name: format(
-          mapState.default.zoneNameFormat,
-          mapState.map.name,
-          zoneId
-        ),
-        type: "zone",
-        x: size.x,
-        y: size.y,
-        width: size.width,
-        height: size.height,
-        laneDirection: laneDirection,
-        laneWidth:
-          laneDirection === "Horizontal" ? maxSize.height : maxSize.width,
-        slotWidth: mapState.default.slotWidth,
-        autoGenerate: false,
-        onlyOneSlot: false,
-        isConveyor: false,
-        capacity: 0,
-        localtionType: "storage",
-        color: "#FFFFFF",
-        labelLocationX: 0,
-        labelLocationY: 0,
-        labelColor: "#000000",
-        markLocationX: 0,
-        markLocationY: 0,
-        progressX: 0,
-        progressY: 0,
-        progressWidth: 0,
-        progressHeight: 0,
-        wallHorizontal: "left",
-        wallVertical: "top",
+        ...defaultZone,
+        ...{
+          key: zoneId,
+          id: zoneId,
+          name: format(
+            mapState.default.zoneNameFormat,
+            mapState.map.name,
+            zoneId
+          ),
+          x: size.x,
+          y: size.y,
+          width: size.width,
+          height: size.height,
+          laneDirection: laneDirection,
+          laneWidth:
+            laneDirection === "Horizontal" ? maxSize.height : maxSize.width,
+          slotWidth: mapState.default.slotWidth,
+          layer: layer,
+        },
       };
 
       if (zone.laneDirection === "Vertical") {
@@ -736,43 +686,38 @@ export const mapManagementSlice = createSlice({
       state = loadData(data, state);
     });
     builder.addCase(importLanes.fulfilled, (state, action) => {
+      let { lanes, layer } = action.payload;
+
       let mapSize = {
         width: Math.max(
           state.map.size.width,
-          _.maxBy(action.payload, (item) => parseFloat(item.tX)).tX
+          _.maxBy(lanes, (item) => parseFloat(item.tX)).tX
         ),
         height: Math.max(
           state.map.size.height,
-          _.maxBy(action.payload, (item) => parseFloat(item.tY)).tY
+          _.maxBy(lanes, (item) => parseFloat(item.tY)).tY
         ),
       };
 
-      for (const laneInfo of action.payload) {
+      for (const laneInfo of lanes) {
         if (!laneInfo.tX || !laneInfo.tY || !laneInfo.width || !laneInfo.height)
           continue;
 
         const lane = {
-          key: uuidv4(),
-          id: null,
-          name: format(state.default.laneNameFormat, state.map.name, 0, 0),
-          zone_id: null,
-          x: parseFloat(laneInfo.bX),
-          y: parseFloat(laneInfo.tY) * -1 + mapSize.height,
-          width: parseFloat(laneInfo.width),
-          height: parseFloat(laneInfo.height),
-          slotWidth: state.default.slotWidth,
-          autoAdjustZone: true,
-          autoGenerate: false,
-          onlyOneSlot: false,
-          capacity: 0,
-          localtionType: "storage",
-          type: "lane",
-          priorites: {},
+          ...defaultLane,
+          ...{
+            key: uuidv4(),
+            name: format(state.default.laneNameFormat, state.map.name, 0, 0),
+            x: parseFloat(laneInfo.bX),
+            y: parseFloat(laneInfo.tY) * -1 + mapSize.height,
+            width: parseFloat(laneInfo.width),
+            height: parseFloat(laneInfo.height),
+            slotWidth: state.default.slotWidth,
+            layer: layer,
+          },
         };
         state.lanes[lane.key] = lane;
       }
-
-      // console.log(mapSize);
 
       state.map = { ...state.map, ...{ size: mapSize } };
     });
@@ -790,9 +735,98 @@ export const mapManagementSlice = createSlice({
     builder.addCase(pasteLanePriorites.fulfilled, (state, action) => {
       let sourceKey = action.payload.source;
       let destinationKey = action.payload.destination;
-      console.log(action.payload);
+
+      if (!state.lanes[destinationKey]) return;
+
+      if (!state.lanes[sourceKey]) return;
 
       state.lanes[destinationKey].priorites = state.lanes[sourceKey].priorites;
+    });
+
+    builder.addCase(pasteLaneProperties.fulfilled, (state, action) => {
+      let sourceKey = action.payload.source;
+      let destinationKey = action.payload.destination;
+      if (!state.lanes[destinationKey]) return;
+      if (!state.lanes[sourceKey]) return;
+
+      let source = { ...state.lanes[sourceKey] };
+      let destination = state.lanes[destinationKey];
+
+      delete source.key;
+      delete source.id;
+      delete source.name;
+      delete source.type;
+      delete source.x;
+      delete source.y;
+      delete source.width;
+      delete source.height;
+
+      state.lanes[destinationKey] = { ...destination, ...source };
+    });
+
+    builder.addCase(pasteZoneProperties.fulfilled, (state, action) => {
+      let sourceKey = action.payload.source;
+      let destinationKey = action.payload.destination;
+
+      if (!state.zones[destinationKey]) return;
+
+      if (!state.zones[sourceKey]) return;
+
+      let source = { ...state.zones[sourceKey] };
+      let destination = state.zones[destinationKey];
+
+      delete source.key;
+      delete source.id;
+      delete source.name;
+      delete source.type;
+      delete source.x;
+      delete source.y;
+      delete source.width;
+      delete source.height;
+
+      state.zones[destinationKey] = { ...destination, ...source };
+    });
+
+    builder.addCase(selectionToCurrentLayer.fulfilled, (state, action) => {
+      let { selections, layer } = action.payload;
+
+      for (const selection of selections) {
+        switch (selection.type) {
+          case "zone":
+            state.zones[selection.id].layer = layer;
+            break;
+          case "lane":
+            state.lanes[selection.id].layer = layer;
+            break;
+          default:
+            state.slots[selection.id].layer = layer;
+            break;
+        }
+      }
+    });
+
+    builder.addCase(deleteLayer.fulfilled, (state, action) => {
+      let layer = state.layers[action.payload];
+
+      for (const key in state.zones) {
+        if (state.zones[key].layer === action.payload) {
+          delete state.zones[key];
+        }
+      }
+
+      for (const key in state.lanes) {
+        if (state.lanes[key].layer === action.payload) {
+          delete state.lanes[key];
+        }
+      }
+
+      for (const key in state.slots) {
+        if (state.slots[key].layer === action.payload) {
+          delete state.slots[key];
+        }
+      }
+
+      delete state.layers[layer.key];
     });
   },
 });
@@ -821,6 +855,9 @@ export const {
   addPriority,
   deletePriority,
   updatePriority,
+  toggleLayerVisible,
+  toggleLayerEditable,
+  addLayer,
 } = mapManagementSlice.actions;
 
 export default mapManagementSlice.reducer;
