@@ -79,10 +79,12 @@ export default function Designer(props) {
     if (!map.showZone) return;
 
     return _.map(zones, (zone) => {
-      if (!layers[zone.layer].visible) return;
+      let layer = layers[zone.layer];
+
+      if (!layer.visible) return;
 
       return (
-        <Zone key={zone.id} zone={zone} scale={zoomInformation.scale}></Zone>
+        <Zone key={zone.id} zone={zone} scale={zoomInformation.scale} layer={layer}></Zone>
       );
     });
   }
@@ -91,10 +93,12 @@ export default function Designer(props) {
     if (!map.showLane) return;
 
     return _.map(lanes, (lane) => {
-      if (!layers[lane.layer].visible) return;
+      let layer = layers[lane.layer];
+
+      if (!layer.visible) return;
 
       return (
-        <Lane key={lane.key} lane={lane} scale={zoomInformation.scale}></Lane>
+        <Lane key={lane.key} lane={lane} scale={zoomInformation.scale} layer={layer}></Lane>
       );
     });
   }
@@ -103,10 +107,12 @@ export default function Designer(props) {
     if (!map.showSlot) return;
 
     return _.map(slots, (slot) => {
-      if (!layers[slot.layer].visible) return;
+      let layer = layers[slot.layer];
+
+      if (!layer.visible) return;
 
       return (
-        <Slot key={slot.key} slot={slot} scale={zoomInformation.scale}></Slot>
+        <Slot key={slot.key} slot={slot} scale={zoomInformation.scale} layer={layer}></Slot>
       );
     });
   }

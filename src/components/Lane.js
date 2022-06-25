@@ -22,10 +22,14 @@ export default function Lane(props) {
   );
   const keys = useSelector((state) => state.keyboard.keys);
   const zoomPercent = useSelector((state) => state.selection.zoom.percent);
+  const greens = useSelector((state) => state.selection.green.lanes);
+  const blues = useSelector((state) => state.selection.blue.lanes);
+  const reds = useSelector((state) => state.selection.red.lanes);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const lane = { ...props.lane };
+  const layer = { ...props.layer };
   const scale = props.scale;
   const color = getShipToGroupColor(lane, shipToGroups);
   let borderWidth = 1;
@@ -143,6 +147,57 @@ export default function Lane(props) {
     return slots;
   }
 
+  function renderGreenOverlay(_lane) {
+    if (!greens.includes(_lane.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_lane.width}
+        height={_lane.height}
+        fill="green"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderBlueOverlay(_lane) {
+    if (!blues.includes(_lane.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_lane.width}
+        height={_lane.height}
+        fill="blue"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderRedOverlay(_lane) {
+    if (!reds.includes(_lane.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_lane.width}
+        height={_lane.height}
+        fill="red"
+        className="green-overlay"
+      />
+    );
+  }
+
   function renderSlot(_map, _zone, _rectSlot) {
     if (!_zone) {
       return <Fragment />;
@@ -195,6 +250,7 @@ export default function Lane(props) {
       style={{
         borderWidth: `${borderWidth}px`,
         backgroundColor: map.showLaneRealColor ? `${color}` : `#FFFFFF96`,
+        opacity: layer.opacity
       }}
       bounds=".content"
       dragGrid={map.snapGrid}
@@ -233,13 +289,16 @@ export default function Lane(props) {
         className="item-area"
         style={{
           marginTop: `-${borderWidth}px`,
-          marginLeft: `-${borderWidth * 2}px`,
+          marginLeft: `-${borderWidth}px`,
         }}
-        width="100%"
-        height="100%"
+        width={lane.width}
+        height={lane.height}
       >
-        {renderSlot(map, zone, rectSlot)}
+        {renderGreenOverlay(lane)}
+        {renderBlueOverlay(lane)}
+        {renderRedOverlay(lane)}
 
+        {renderSlot(map, zone, rectSlot)}
         <text x="10" y="20" className="small">
           Lane : {lane.name}
         </text>

@@ -412,6 +412,15 @@ export default function ToolsBar(props) {
               >
                 Layers Editors
               </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseNavEditor();
+                  dispatch(changeEditorMode(EditorMode.MergeTool));
+                }}
+              >
+                Merge Tool
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>

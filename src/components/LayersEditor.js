@@ -41,6 +41,7 @@ import _ from "lodash";
 
 export default function LayersEditor() {
   const [anchorElMenu, setAnchorElMenu] = React.useState(null);
+  const [menuLayer, setMenuLayer] = React.useState(null);
   const menuOpen = Boolean(anchorElMenu);
 
   const dispatch = useDispatch();
@@ -54,9 +55,10 @@ export default function LayersEditor() {
     dispatch(changeEditorMode(EditorMode.None));
   };
 
-  const handleMenuClick = (event) => {
+  const handleMenuClick = (event, layer) => {
     event.stopPropagation();
     setAnchorElMenu(event.currentTarget);
+    setMenuLayer(layer.key);
   };
 
   const handleMenuClose = () => {
@@ -155,7 +157,10 @@ export default function LayersEditor() {
                             >
                               <RemoveIcon />
                             </IconButton>
-                            <IconButton size="small" onClick={handleMenuClick}>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleMenuClick(e, layer)}
+                            >
                               <MoreVertIcon />
                             </IconButton>
                           </TableCell>
@@ -178,7 +183,7 @@ export default function LayersEditor() {
                 <MenuItem
                   onClick={() => {
                     handleMenuClose();
-                    dispatch(selectionToCurrentLayer());
+                    dispatch(selectionToCurrentLayer(menuLayer));
                   }}
                 >
                   To Layer

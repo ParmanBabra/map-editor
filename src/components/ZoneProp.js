@@ -389,6 +389,14 @@ export default function ZoneProp(props) {
           Genarate
         </Button>
       </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button
+          variant="contained"
+          onClick={() => dispatch(updateLanesOfZone(zone.id))}
+        >
+          Update Lane
+        </Button>
+      </Grid>
       {zone.localtionType === "storage" ? (
         <React.Fragment>
           <Grid item xs={12} sm={6}>

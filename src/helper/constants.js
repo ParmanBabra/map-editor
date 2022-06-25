@@ -7,6 +7,7 @@ export const EditorMode = {
   Layers: "layers",
   ShipToGroup: "ship-to-group",
   Map: "map",
+  MergeTool: "merge-tool",
 };
 
 export const ContentType = {
@@ -69,5 +70,28 @@ export const defaultLane = {
 };
 
 export const defaultSlot = {
+  key: null,
+  id: null,
+  name: null,
+  zone_id: null,
+  lane_id: null,
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 200,
   layer: 1,
+};
+
+export const defaultLayer = {
+  key: null,
+  name: null,
+  visible: true,
+  editable: true,
+  isDefault: false,
+  opacity: 1,
+};
+
+export const SourceMatchedLayerOptions = {
+  NewLayer: "new-layer",
+  DeleteSourceElement: "delete-source-element",
 };

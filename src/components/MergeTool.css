@@ -1,0 +1,11 @@
+.merge-tool {
+  position: fixed;
+  left: 10px;
+  top: 90px;
+  max-width: 350px;
+  opacity: 0.75;
+}
+
+.merge-tool:hover {
+  opacity: 0.9;
+}

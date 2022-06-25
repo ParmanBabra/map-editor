@@ -45,3 +45,7 @@
 .wall {
   fill: rgba(77, 16, 16, 0.5);
 }
+
+.green-overlay {
+  opacity: 0.25;
+}

@@ -17,8 +17,16 @@ import {
   calculateSlotCountZone,
   calculateSlotCountLane,
 } from "./../helper/export-zone";
-import { ContentType, defaultZone, defaultLane } from "./../helper/constants";
+import {
+  ContentType,
+  defaultZone,
+  defaultLane,
+  defaultLayer,
+  SourceMatchedLayerOptions,
+} from "./../helper/constants";
 import { selectionToCurrentLayer } from "./selection";
+
+import { updateParams, merge } from "./merge-tool";
 import { TxtReader } from "txt-reader";
 import Papa from "papaparse";
 
@@ -157,8 +165,64 @@ const loadData = (data, state) => {
   state.default = { ...state.default, ...data.default };
   state.zones = data.zones;
   state.lanes = data.lanes;
+  state.layers = data.layers;
 
   return state;
+};
+
+const _updateLanesOfZone = (zone_id, state) => {
+  let zone = state.zones[zone_id];
+  let lanes = _.values(state.lanes);
+  let laneInZoneOld = _.filter(lanes, (item) => item.zone_id === zone.id);
+  let lanesInZone = collisionBox(zone, lanes);
+
+  for (const lane of laneInZoneOld) {
+    if (!lane.autoAdjustZone) continue;
+
+    lane.id = null;
+    lane.zone_id = null;
+    lane.name = format(state.default.laneNameFormat, state.map.name, 0, 0);
+  }
+
+  let collisionLane = [];
+
+  for (const laneInfo of lanesInZone) {
+    if (laneInfo.percentOverlap < 0.9) continue;
+
+    let lane = state.lanes[laneInfo.id];
+    collisionLane.push(lane);
+  }
+
+  if (collisionLane.length > 0) {
+    if (zone.laneDirection === "Vertical") {
+      collisionLane = _.orderBy(
+        collisionLane,
+        ["x"],
+        [zone.wallHorizontal === "left" ? "asc" : "desc"]
+      );
+    } else {
+      collisionLane = _.orderBy(
+        collisionLane,
+        ["y"],
+        [zone.wallVertical === "top" ? "asc" : "desc"]
+      );
+    }
+
+    let index = 1;
+    for (const lane of collisionLane) {
+      if (!lane.autoAdjustZone) continue;
+
+      lane.id = index;
+      lane.zone_id = zone.id;
+      lane.name = format(
+        state.default.laneNameFormat,
+        state.map.name,
+        lane.zone_id,
+        lane.id
+      );
+      index++;
+    }
+  }
 };
 
 export const mapManagementSlice = createSlice({
@@ -199,6 +263,7 @@ export const mapManagementSlice = createSlice({
         visible: true,
         editable: true,
         isDefault: true,
+        opacity: 1,
       },
     },
     map: {
@@ -320,58 +385,7 @@ export const mapManagementSlice = createSlice({
       }
     },
     updateLanesOfZone: (state, action) => {
-      let zone = state.zones[action.payload];
-      let lanes = _.values(state.lanes);
-      let laneInZoneOld = _.filter(lanes, (item) => item.zone_id === zone.id);
-      let lanesInZone = collisionBox(zone, lanes);
-
-      for (const lane of laneInZoneOld) {
-        if (!lane.autoAdjustZone) continue;
-
-        lane.id = null;
-        lane.zone_id = null;
-        lane.name = format(state.default.laneNameFormat, state.map.name, 0, 0);
-      }
-
-      let collisionLane = [];
-
-      for (const laneInfo of lanesInZone) {
-        if (laneInfo.percentOverlap < 0.9) continue;
-
-        let lane = state.lanes[laneInfo.id];
-        collisionLane.push(lane);
-      }
-
-      if (collisionLane.length > 0) {
-        if (zone.laneDirection === "Vertical") {
-          collisionLane = _.orderBy(
-            collisionLane,
-            ["x"],
-            [zone.wallHorizontal === "left" ? "asc" : "desc"]
-          );
-        } else {
-          collisionLane = _.orderBy(
-            collisionLane,
-            ["y"],
-            [zone.wallVertical === "top" ? "asc" : "desc"]
-          );
-        }
-
-        let index = 1;
-        for (const lane of collisionLane) {
-          if (!lane.autoAdjustZone) continue;
-
-          lane.id = index;
-          lane.zone_id = zone.id;
-          lane.name = format(
-            state.default.laneNameFormat,
-            state.map.name,
-            lane.zone_id,
-            lane.id
-          );
-          index++;
-        }
-      }
+      _updateLanesOfZone(action.payload, state);
     },
     addZone: (state, action) => {
       let { currentLayer } = action.payload;
@@ -468,11 +482,11 @@ export const mapManagementSlice = createSlice({
       state.map.layerRunning += 1;
 
       const layer = {
-        key: new Date().getTime(),
-        name: `Layer ${state.map.layerRunning}`,
-        visible: true,
-        editable: true,
-        isDefault: false,
+        ...defaultLayer,
+        ...{
+          key: new Date().getTime(),
+          name: `Layer ${state.map.layerRunning}`,
+        },
       };
 
       state.layers[layer.key] = layer;
@@ -574,7 +588,6 @@ export const mapManagementSlice = createSlice({
         state.lanes[lane.key] = lane;
         index++;
       }
-
       state.zones[zone.key] = zone;
     },
 
@@ -743,11 +756,9 @@ export const mapManagementSlice = createSlice({
       state.lanes[destinationKey].priorites = state.lanes[sourceKey].priorites;
     });
 
-    builder.addCase(pasteLaneProperties.fulfilled, (state, action) => {
-      let sourceKey = action.payload.source;
-      let destinationKey = action.payload.destination;
-      if (!state.lanes[destinationKey]) return;
-      if (!state.lanes[sourceKey]) return;
+    const mergeLane = (state, sourceKey, destinationKey) => {
+      if (!state.lanes[destinationKey]) return false;
+      if (!state.lanes[sourceKey]) return false;
 
       let source = { ...state.lanes[sourceKey] };
       let destination = state.lanes[destinationKey];
@@ -760,17 +771,15 @@ export const mapManagementSlice = createSlice({
       delete source.y;
       delete source.width;
       delete source.height;
+      delete source.layer;
 
       state.lanes[destinationKey] = { ...destination, ...source };
-    });
+      return true;
+    };
 
-    builder.addCase(pasteZoneProperties.fulfilled, (state, action) => {
-      let sourceKey = action.payload.source;
-      let destinationKey = action.payload.destination;
-
-      if (!state.zones[destinationKey]) return;
-
-      if (!state.zones[sourceKey]) return;
+    const mergeZone = (state, sourceKey, destinationKey) => {
+      if (!state.zones[destinationKey]) return false;
+      if (!state.zones[sourceKey]) return false;
 
       let source = { ...state.zones[sourceKey] };
       let destination = state.zones[destinationKey];
@@ -783,8 +792,22 @@ export const mapManagementSlice = createSlice({
       delete source.y;
       delete source.width;
       delete source.height;
+      delete source.layer;
 
       state.zones[destinationKey] = { ...destination, ...source };
+      return true;
+    };
+
+    builder.addCase(pasteLaneProperties.fulfilled, (state, action) => {
+      let sourceKey = action.payload.source;
+      let destinationKey = action.payload.destination;
+      mergeLane(state, sourceKey, destinationKey);
+    });
+
+    builder.addCase(pasteZoneProperties.fulfilled, (state, action) => {
+      let sourceKey = action.payload.source;
+      let destinationKey = action.payload.destination;
+      mergeZone(state, sourceKey, destinationKey);
     });
 
     builder.addCase(selectionToCurrentLayer.fulfilled, (state, action) => {
@@ -827,6 +850,103 @@ export const mapManagementSlice = createSlice({
       }
 
       delete state.layers[layer.key];
+    });
+
+    const updateOpacity = (layer, opacity) => {
+      if (!layer) return;
+
+      layer.opacity = opacity;
+    };
+
+    builder.addCase(updateParams.fulfilled, (state, action) => {
+      let { oldParams, newParams } = action.payload;
+
+      updateOpacity(state.layers[oldParams.sourceLayer], 1);
+      updateOpacity(state.layers[newParams.sourceLayer], 0.5);
+
+      updateOpacity(state.layers[oldParams.destinationLayer], 1);
+      updateOpacity(state.layers[newParams.destinationLayer], 0.5);
+
+      updateOpacity(state.layers[oldParams.sourceMatchedLayer], 1);
+      updateOpacity(state.layers[newParams.sourceMatchedLayer], 0.5);
+    });
+
+    builder.addCase(merge.fulfilled, (state, action) => {
+      let { matched, params } = action.payload;
+
+      let resultLayer = params.sourceMatchedLayer;
+      let updateZones = [];
+
+      if (params.sourceMatchedLayer === SourceMatchedLayerOptions.NewLayer) {
+        state.map.layerRunning += 1;
+
+        const layer = {
+          ...defaultLayer,
+          ...{
+            key: new Date().getTime(),
+            name: `Layer ${state.map.layerRunning}`,
+          },
+        };
+
+        state.layers[layer.key] = layer;
+        resultLayer = layer.key;
+      }
+
+      for (const matching of matched.zones) {
+        let result = mergeZone(state, matching.source, matching.destination);
+
+        if (!result) continue;
+
+        if (
+          params.sourceMatchedLayer ===
+          SourceMatchedLayerOptions.DeleteSourceElement
+        ) {
+          delete state.zones[matching.source];
+        } else {
+          state.zones[matching.source].layer = resultLayer;
+        }
+      }
+
+      for (const matching of matched.lanes) {
+        let result = mergeLane(state, matching.source, matching.destination);
+
+        if (!result) continue;
+
+        if (
+          params.sourceMatchedLayer ===
+          SourceMatchedLayerOptions.DeleteSourceElement
+        ) {
+          delete state.lanes[matching.source];
+        } else {
+          state.lanes[matching.source].layer = resultLayer;
+        }
+
+        let destination = state.lanes[matching.destination];
+
+        if (!updateZones.includes(destination.zone_id)) {
+          updateZones.push(destination.zone_id);
+        }
+      }
+
+      for (const matching of matched.slots) {
+      }
+
+      for (const zone_id of updateZones) {
+        _updateLanesOfZone(zone_id, state);
+      }
+
+      //clear layer state
+      state.layers[params.sourceLayer].opacity = 1;
+      state.layers[params.destinationLayer].opacity = 1;
+
+      if (
+        params.sourceMatchedLayer === SourceMatchedLayerOptions.NewLayer ||
+        params.sourceMatchedLayer ===
+          SourceMatchedLayerOptions.DeleteSourceElement
+      )
+        return;
+
+      state.layers[params.sourceMatchedLayer].opacity = 1;
     });
   },
 });

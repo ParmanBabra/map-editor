@@ -16,10 +16,14 @@ export default function Slot(props) {
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
   const zoomPercent = useSelector((state) => state.selection.zoom.percent);
+  const greens = useSelector((state) => state.selection.green.slots);
+  const blues = useSelector((state) => state.selection.blue.slots);
+  const reds = useSelector((state) => state.selection.red.slots);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const slot = { ...props.slot };
+  const layer = { ...props.layer };
   const scale = props.scale;
 
   let borderWidth = 1;
@@ -82,6 +86,57 @@ export default function Slot(props) {
     }
   }
 
+  function renderGreenOverlay(_slot) {
+    if (!greens.includes(_slot.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_slot.width}
+        height={_slot.height}
+        fill="green"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderBlueOverlay(_slot) {
+    if (!blues.includes(_slot.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_slot.width}
+        height={_slot.height}
+        fill="blue"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderRedOverlay(_slot) {
+    if (!reds.includes(_slot.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_slot.width}
+        height={_slot.height}
+        fill="red"
+        className="green-overlay"
+      />
+    );
+  }
+
   useEffect(() => {
     radRef.current.updatePosition({ x: slot.x, y: slot.y });
   });
@@ -94,6 +149,7 @@ export default function Slot(props) {
       bounds=".content"
       style={{
         borderWidth: `${borderWidth}px`,
+        opacity: layer.opacity
       }}
       dragGrid={map.snapGrid}
       resizeGrid={map.snapGrid}
@@ -132,11 +188,14 @@ export default function Slot(props) {
         className="item-area"
         style={{
           marginTop: `-${borderWidth}px`,
-          marginLeft: `-${borderWidth * 2}px`,
+          marginLeft: `-${borderWidth}px`,
         }}
-        width="100%"
-        height="100%"
+        width={slot.width}
+        height={slot.height}
       >
+        {renderGreenOverlay(slot)}
+        {renderBlueOverlay(slot)}
+        {renderRedOverlay(slot)}
         <text x="10" y="20" className="small">
           Slot : {slot.name}
         </text>

@@ -8,6 +8,7 @@ import Designer from "./components/Designer";
 import ToolsBar from "./components/ToolsBar";
 import PropertyEditor from "./components/PropertyEditor";
 import LayersEditor from "./components/LayersEditor";
+import MergeTool from "./components/MergeTool";
 
 import { up, down, mouseDown, mouseUp } from "./reducers/keyboard-management";
 
@@ -48,6 +49,7 @@ function App() {
       <Designer />
       <PropertyEditor />
       <LayersEditor />
+      <MergeTool />
     </div>
   );
 }

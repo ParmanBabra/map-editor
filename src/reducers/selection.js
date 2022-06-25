@@ -4,12 +4,14 @@ import { System as Collisions, Box, Vector } from "detect-collisions";
 
 import { ContentType } from "./../helper/constants";
 import { deleteLayer } from "./map-management";
+import { processing, merge } from "./merge-tool";
+import _ from "lodash";
 
 export const selectionToCurrentLayer = createAsyncThunk(
   "selection/to-current-layer",
   async (key, thunkAPI) => {
-    const { selections, currentLayer } = thunkAPI.getState().selection;
-    return { selections, layer: currentLayer };
+    const { selections } = thunkAPI.getState().selection;
+    return { selections, layer: key };
   }
 );
 
@@ -17,6 +19,13 @@ export const selectionSlice = createSlice({
   name: "selection",
   initialState: {
     selections: [],
+    green: {
+      zones: [],
+      lanes: [],
+      slots: [],
+    },
+    blue: { zones: [], lanes: [], slots: [] },
+    red: { zones: [], lanes: [], slots: [] },
     contents: {
       type: ContentType.Name,
       value: "",
@@ -121,6 +130,36 @@ export const selectionSlice = createSlice({
       if (action.payload == state.currentLayer) {
         state.currentLayer = 1;
       }
+    });
+
+    builder.addCase(processing.fulfilled, (state, action) => {
+      let matchedResults = action.payload;
+      state.green.zones = _.map(matchedResults.zones, (item) => item.source);
+      state.green.lanes = _.map(matchedResults.lanes, (item) => item.source);
+      state.green.slots = _.map(matchedResults.slots, (item) => item.source);
+
+      state.blue.zones = _.map(
+        matchedResults.zones,
+        (item) => item.destination
+      );
+      state.blue.lanes = _.map(
+        matchedResults.lanes,
+        (item) => item.destination
+      );
+      state.blue.slots = _.map(
+        matchedResults.slots,
+        (item) => item.destination
+      );
+    });
+
+    builder.addCase(merge.fulfilled, (state, action) => {
+      state.green.zones = [];
+      state.green.lanes = [];
+      state.green.slots = [];
+
+      state.blue.zones = [];
+      state.blue.lanes = [];
+      state.blue.slots = [];
     });
   },
 });

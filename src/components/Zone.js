@@ -17,10 +17,14 @@ export default function Zone(props) {
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
   const zoomPercent = useSelector((state) => state.selection.zoom.percent);
+  const greens = useSelector((state) => state.selection.green.zones);
+  const blues = useSelector((state) => state.selection.blue.zones);
+  const reds = useSelector((state) => state.selection.red.zones);
   const dispatch = useDispatch();
   let radRef = useRef(null);
 
   const zone = { ...props.zone };
+  const layer = { ...props.layer };
   const scale = props.scale;
   let borderWidth = 1;
 
@@ -272,6 +276,57 @@ export default function Zone(props) {
     );
   }
 
+  function renderGreenOverlay(_zone) {
+    if (!greens.includes(_zone.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_zone.width}
+        height={_zone.height}
+        fill="green"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderBlueOverlay(_zone) {
+    if (!blues.includes(_zone.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_zone.width}
+        height={_zone.height}
+        fill="blue"
+        className="green-overlay"
+      />
+    );
+  }
+
+  function renderRedOverlay(_zone) {
+    if (!reds.includes(_zone.key)) {
+      return;
+    }
+
+    return (
+      <rect
+        x="0"
+        y="0"
+        width={_zone.width}
+        height={_zone.height}
+        fill="red"
+        className="green-overlay"
+      />
+    );
+  }
+
   useEffect(() => {
     radRef.current.updatePosition({ x: zone.x, y: zone.y });
   });
@@ -287,6 +342,8 @@ export default function Zone(props) {
       style={{
         borderWidth: `${borderWidth}px`,
         backgroundColor: map.showZoneRealColor ? `${zone.color}` : `#FFFFFF96`,
+
+        opacity: layer.opacity
       }}
       bounds=".content"
       dragGrid={map.snapGrid}
@@ -325,11 +382,15 @@ export default function Zone(props) {
         className="item-area"
         style={{
           marginTop: `-${borderWidth}px`,
-          marginLeft: `-${borderWidth * 2}px`,
+          marginLeft: `-${borderWidth}px`,
         }}
-        width="100%"
-        height="100%"
+        width={zone.width}
+        height={zone.height}
       >
+        {renderGreenOverlay(zone)}
+        {renderBlueOverlay(zone)}
+        {renderRedOverlay(zone)}
+
         {renderSlot(map, rectSlot)}
         {renderLane(map, lineLane)}
         {zone.localtionType === "storage" ? renderWalls(map, zone) : null}
