@@ -65,7 +65,8 @@ export default function ShipToGroupDialog({ open, onClose }) {
                   <TableRow>
                     <TableCell>ID</TableCell>
                     <TableCell align="left">Name</TableCell>
-                    <TableCell align="center">Color</TableCell>
+                    <TableCell align="center">PP Color</TableCell>
+                    <TableCell align="center">PM Color</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -78,10 +79,21 @@ export default function ShipToGroupDialog({ open, onClose }) {
                       <TableCell align="center">
                         <ColorField
                           fullWidth
-                          value={row.color}
+                          value={row.ppColor}
                           onChange={(e) => {
                             let shipToGroup = { ...shipToGroupsDic[row.id] };
-                            shipToGroup.color = e;
+                            shipToGroup.ppColor = e;
+                            dispatch(update(shipToGroup));
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <ColorField
+                          fullWidth
+                          value={row.pmColor}
+                          onChange={(e) => {
+                            let shipToGroup = { ...shipToGroupsDic[row.id] };
+                            shipToGroup.pmColor = e;
                             dispatch(update(shipToGroup));
                           }}
                         />

@@ -1,6 +1,7 @@
 import moment from "moment-timezone";
 import format from "format";
 import _ from "lodash";
+import { defaultSlot, ShipToGroupType } from "./constants";
 
 function convertOriginXToBottomLeft(y, height, mapHeight) {
   let newY = Math.abs(y - mapHeight);
@@ -435,13 +436,16 @@ export const generateSlotRectFromTemplateZone = (lanes, zone) => {
           i += zone.slotWidth
         ) {
           slots.push({
-            id: zone.wallVertical === "top" ? index : slotCount - index + 1,
-            lane_id: lane.id,
-            zone_id: zone.id,
-            x: lane.x + 0.25,
-            y: zone.y + i + 0.25,
-            width: zone.laneWidth - 0.5,
-            height: zone.slotWidth - 0.5,
+            ...defaultSlot,
+            ...{
+              id: zone.wallVertical === "top" ? index : slotCount - index + 1,
+              lane_id: lane.id,
+              zone_id: zone.id,
+              x: lane.x + 0.25,
+              y: zone.y + i + 0.25,
+              width: lane.width - 0.5,
+              height: zone.slotWidth - 0.5,
+            },
           });
 
           index++;
@@ -450,13 +454,17 @@ export const generateSlotRectFromTemplateZone = (lanes, zone) => {
         let slotCount = Math.floor(lane.width / zone.slotWidth);
         for (let i = 0; i <= lane.width - zone.slotWidth; i += zone.slotWidth) {
           slots.push({
-            id: zone.wallHorizontal === "left" ? index : slotCount - index + 1,
-            lane_id: lane.id,
-            zone_id: zone.id,
-            x: zone.x + i + 0.25,
-            y: lane.y + 0.25,
-            width: zone.slotWidth - 0.5,
-            height: zone.laneWidth - 0.5,
+            ...defaultSlot,
+            ...{
+              id:
+                zone.wallHorizontal === "left" ? index : slotCount - index + 1,
+              lane_id: lane.id,
+              zone_id: zone.id,
+              x: zone.x + i + 0.25,
+              y: lane.y + 0.25,
+              width: zone.slotWidth - 0.5,
+              height: lane.height - 0.5,
+            },
           });
 
           index++;
@@ -465,13 +473,16 @@ export const generateSlotRectFromTemplateZone = (lanes, zone) => {
     }
   } else {
     slots.push({
-      id: 1,
-      zone_id: zone.id,
-      lane_id: 1,
-      x: zone.x,
-      y: zone.y,
-      width: zone.width,
-      height: zone.height,
+      ...defaultSlot,
+      ...{
+        id: 1,
+        zone_id: zone.id,
+        lane_id: 1,
+        x: zone.x,
+        y: zone.y,
+        width: zone.width,
+        height: zone.height,
+      },
     });
   }
 
@@ -488,13 +499,16 @@ export const generateSlotRectFromTemplateLane = (lane, zone) => {
       let slotCount = Math.floor(lane.height / zone.slotWidth);
       for (let i = 0; i <= lane.height - zone.slotWidth; i += zone.slotWidth) {
         slots.push({
-          id: zone.wallVertical === "top" ? index : slotCount - index + 1,
-          lane_id: lane.id,
-          zone_id: zone.id,
-          x: lane.x + 0.25,
-          y: lane.y + i + 0.25,
-          width: lane.width - 0.5,
-          height: zone.slotWidth - 0.5,
+          ...defaultSlot,
+          ...{
+            id: zone.wallVertical === "top" ? index : slotCount - index + 1,
+            lane_id: lane.id,
+            zone_id: zone.id,
+            x: lane.x + 0.25,
+            y: lane.y + i + 0.25,
+            width: lane.width - 0.5,
+            height: zone.slotWidth - 0.5,
+          },
         });
 
         index++;
@@ -503,13 +517,16 @@ export const generateSlotRectFromTemplateLane = (lane, zone) => {
       let slotCount = Math.floor(lane.width / zone.slotWidth);
       for (let i = 0; i <= lane.width - zone.slotWidth; i += zone.slotWidth) {
         slots.push({
-          id: zone.wallHorizontal === "left" ? index : slotCount - index + 1,
-          lane_id: lane.id,
-          zone_id: zone.id,
-          x: lane.x + i + 0.25,
-          y: lane.y + 0.25,
-          width: zone.slotWidth - 0.5,
-          height: lane.height - 0.5,
+          ...defaultSlot,
+          ...{
+            id: zone.wallHorizontal === "left" ? index : slotCount - index + 1,
+            lane_id: lane.id,
+            zone_id: zone.id,
+            x: lane.x + i + 0.25,
+            y: lane.y + 0.25,
+            width: zone.slotWidth - 0.5,
+            height: lane.height - 0.5,
+          },
         });
 
         index++;
@@ -518,13 +535,16 @@ export const generateSlotRectFromTemplateLane = (lane, zone) => {
     // }
   } else {
     slots.push({
-      id: 1,
-      zone_id: zone.id,
-      lane_id: lane.id,
-      x: lane.x,
-      y: lane.y,
-      width: lane.width,
-      height: lane.height,
+      ...defaultSlot,
+      ...{
+        id: 1,
+        zone_id: zone.id,
+        lane_id: lane.id,
+        x: lane.x,
+        y: lane.y,
+        width: lane.width,
+        height: lane.height,
+      },
     });
   }
 
@@ -722,11 +742,54 @@ export const exportShipToGroups = (all_shipToGroups, map) => {
       updateby: map.updateBy,
       is_active: true,
       warehouse_id: map.warehouseId,
-      colour: shipToGroup.color,
     };
 
-    let sql = generateSQLPerRow(row, ["id"], "tbm_ship_to_group");
+    let sql = generateSQLPerRow(
+      row,
+      ["id", "warehouse_id"],
+      "tbm_ship_to_group"
+    );
     rows.push(sql);
+  }
+
+  for (const shipToGroup of shipToGroups) {
+    let row = {
+      ship_to_group: shipToGroup.id,
+      load_type: ShipToGroupType.PP,
+      createdate: getSQLDate(Date()),
+      createby: map.updateBy,
+      updatedate: getSQLDate(Date()),
+      updateby: map.updateBy,
+      colour_product: shipToGroup.ppColor,
+      colour_lane: shipToGroup.ppColor,
+      warehouse_id: map.warehouseId,
+    };
+
+    let sql = generateSQLPerRow(
+      row,
+      ["ship_to_group", "load_type", "warehouse_id"],
+      "cip_tbt_ship_to_group_map_type"
+    );
+    rows.push(sql);
+
+    let row2 = {
+      ship_to_group: shipToGroup.id,
+      load_type: ShipToGroupType.PM,
+      createdate: getSQLDate(Date()),
+      createby: map.updateBy,
+      updatedate: getSQLDate(Date()),
+      updateby: map.updateBy,
+      colour_product: shipToGroup.pmColor,
+      colour_lane: shipToGroup.pmColor,
+      warehouse_id: map.warehouseId,
+    };
+
+    let sql2 = generateSQLPerRow(
+      row2,
+      ["ship_to_group", "load_type", "warehouse_id"],
+      "cip_tbt_ship_to_group_map_type"
+    );
+    rows.push(sql2);
   }
 
   return rows;

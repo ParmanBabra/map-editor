@@ -38,7 +38,7 @@ import {
   pasteLanePriorites,
   pasteLaneProperties,
 } from "./../reducers/map-management";
-import { ContentType } from "./../helper/constants";
+import { ContentType, ShipToGroupType } from "./../helper/constants";
 
 import { copyLanePriorites, copyLaneProperties } from "./../reducers/selection";
 
@@ -254,9 +254,13 @@ export default function LaneProp(props) {
               <TableBody>
                 {_.values(lane.priorites).map((row, index) => {
                   let shipColor = Color("#FFFFFF");
-                  if (row.shipToGroup) {
+                  if (row.shipToGroup && row.type) {
                     let selectingShipToGroup = shipToGroups[row.shipToGroup];
-                    shipColor = Color(selectingShipToGroup.color);
+                    if (row.type == ShipToGroupType.PM) {
+                      shipColor = Color(selectingShipToGroup.pmColor);
+                    } else {
+                      shipColor = Color(selectingShipToGroup.ppColor);
+                    }
                   }
 
                   let textShipColor = shipColor.grayscale().negate();

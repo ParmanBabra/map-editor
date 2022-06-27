@@ -95,3 +95,8 @@ export const SourceMatchedLayerOptions = {
   NewLayer: "new-layer",
   DeleteSourceElement: "delete-source-element",
 };
+
+export const ShipToGroupType = {
+  PP: 10,
+  PM: 20,
+};

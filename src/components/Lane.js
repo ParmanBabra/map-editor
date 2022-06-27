@@ -9,7 +9,7 @@ import { select, addSelect } from "./../reducers/selection";
 
 import "./Lane.css";
 
-import { rectBorder } from "./../helper/constants";
+import { rectBorder, ShipToGroupType } from "./../helper/constants";
 
 export default function Lane(props) {
   const selections = useSelector((state) => state.selection.selections);
@@ -52,15 +52,16 @@ export default function Lane(props) {
 
   function getShipToGroupColor(_lane, _shipToGroups) {
     let priorites = _.values(_lane.priorites);
-    let firstShipToGroup = null;
-
+    let firstPriority = null;
     if (priorites.length > 0) {
-      const firstPriority = _.values(_lane.priorites)[0];
-      firstShipToGroup = _shipToGroups[firstPriority.shipToGroup];
+      firstPriority = _.values(_lane.priorites)[0];
     }
 
-    if (firstShipToGroup) {
-      return `${firstShipToGroup.color}AA`;
+    if (firstPriority && firstPriority.shipToGroup && firstPriority.type) {
+      let firstShipToGroup = _shipToGroups[firstPriority.shipToGroup];
+      if (firstPriority.type === ShipToGroupType.PM)
+        return `${firstShipToGroup.pmColor}AA`;
+      else return `${firstShipToGroup.ppColor}AA`;
     } else {
       return `#FFFFFF96`;
     }
@@ -250,7 +251,7 @@ export default function Lane(props) {
       style={{
         borderWidth: `${borderWidth}px`,
         backgroundColor: map.showLaneRealColor ? `${color}` : `#FFFFFF96`,
-        opacity: layer.opacity
+        opacity: layer.opacity,
       }}
       bounds=".content"
       dragGrid={map.snapGrid}

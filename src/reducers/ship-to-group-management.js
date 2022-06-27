@@ -75,7 +75,8 @@ export const shipToGroupsSlice = createSlice({
         const shipToGroup = {
           id: shipToGroupInfo.id,
           name: shipToGroupInfo.description,
-          color: shipToGroupInfo.color,
+          ppColor: shipToGroupInfo.color,
+          pmColor: shipToGroupInfo.color,
         };
 
         state.shipToGroups[shipToGroup.id] = shipToGroup;
