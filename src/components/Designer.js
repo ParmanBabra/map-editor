@@ -84,7 +84,12 @@ export default function Designer(props) {
       if (!layer.visible) return;
 
       return (
-        <Zone key={zone.id} zone={zone} scale={zoomInformation.scale} layer={layer}></Zone>
+        <Zone
+          key={zone.id}
+          zone={zone}
+          scale={zoomInformation.scale}
+          layer={layer}
+        ></Zone>
       );
     });
   }
@@ -98,7 +103,12 @@ export default function Designer(props) {
       if (!layer.visible) return;
 
       return (
-        <Lane key={lane.key} lane={lane} scale={zoomInformation.scale} layer={layer}></Lane>
+        <Lane
+          key={lane.key}
+          lane={lane}
+          scale={zoomInformation.scale}
+          layer={layer}
+        ></Lane>
       );
     });
   }
@@ -112,7 +122,12 @@ export default function Designer(props) {
       if (!layer.visible) return;
 
       return (
-        <Slot key={slot.key} slot={slot} scale={zoomInformation.scale} layer={layer}></Slot>
+        <Slot
+          key={slot.key}
+          slot={slot}
+          scale={zoomInformation.scale}
+          layer={layer}
+        ></Slot>
       );
     });
   }
@@ -154,7 +169,7 @@ export default function Designer(props) {
   }, [zoomInformation]);
 
   return (
-    <div id="map">
+    <div id="map" style={{ cursor: canPanning ? "unset" : "move" }}>
       <TransformWrapper
         panning={{ excluded: ["rect", "item-area"], disabled: canPanning }}
         minScale={0.2}
@@ -180,9 +195,6 @@ export default function Designer(props) {
             onClick={(e) => {
               dispatch(clear());
             }}
-            // onMouseUp={handleMouseUp}
-            // onMouseMove={handleMouseMove}
-            // onMouseDown={handleMouseDown}
           ></div>
 
           {renderGrid()}
@@ -192,8 +204,6 @@ export default function Designer(props) {
           {renderLanes(lanes, layers, map)}
 
           {renderSlots(slots, layers, map)}
-
-          {/* {renderSelectRect()} */}
 
           <h1 className="map-name">Map : {map.name}</h1>
         </TransformComponent>

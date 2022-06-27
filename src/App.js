@@ -3,12 +3,13 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-
 import Designer from "./components/Designer";
 import ToolsBar from "./components/ToolsBar";
 import PropertyEditor from "./components/PropertyEditor";
 import LayersEditor from "./components/LayersEditor";
 import MergeTool from "./components/MergeTool";
+import ShipToGroupEditor from "./components/ShipToGroupEditor";
+import MapEditor from "./components/MapEditor";
 
 import { up, down, mouseDown, mouseUp } from "./reducers/keyboard-management";
 
@@ -50,6 +51,8 @@ function App() {
       <PropertyEditor />
       <LayersEditor />
       <MergeTool />
+      <ShipToGroupEditor />
+      <MapEditor />
     </div>
   );
 }

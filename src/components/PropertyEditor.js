@@ -14,7 +14,6 @@ export default function PropertyEditor(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
-
   const selections = useSelector((state) => state.selection.selections);
 
   let selecting = null;

@@ -1,13 +1,13 @@
-.merge-tool {
+.map-editor {
   position: fixed;
   left: 10px;
   top: 90px;
   max-width: 350px;
-  opacity: 0.75;
   max-height: calc(100vh - 130px);
+  opacity: 0.5;
   overflow: auto;
 }
 
-.merge-tool:hover {
+.map-editor:hover {
   opacity: 0.9;
 }

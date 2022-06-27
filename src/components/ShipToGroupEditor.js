@@ -1,61 +1,70 @@
 import React, { Fragment, FunctionComponent } from "react";
-import Modal from "@mui/material/Modal";
-import Fade from "@mui/material/Fade";
-import Backdrop from "@mui/material/Backdrop";
-import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Slide from "@mui/material/Slide";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 
-import { update } from "./../reducers/ship-to-group-management";
+import { update } from "../reducers/ship-to-group-management";
 
 import { useSelector, useDispatch } from "react-redux";
 import { ColorField } from "./ColorField";
+
 import _ from "lodash";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 750,
-  height: "80%",
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
+import { EditorMode } from "../helper/constants";
+import { changeEditorMode } from "../reducers/selection";
 
-export default function ShipToGroupDialog({ open, onClose }) {
+import "./ShipToGroupEditor.css"
+
+export default function ShipToGroupEditor() {
   const shipToGroupsDic = useSelector(
     (state) => state.shipToGroupsManagement.shipToGroups
   );
+  const mode = useSelector((state) => state.selection.editor_mode);
+
   const dispatch = useDispatch();
 
   const shipToGroups = _.values(shipToGroupsDic);
 
+  const handleCloseEditor = () => {
+    dispatch(changeEditorMode(EditorMode.None));
+  };
+
   return (
     <Fragment>
-      <Modal
-        open={open}
-        onClose={onClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={open}>
-          <Box sx={style}>
-            <Typography id="transition-modal-title" variant="h6" component="h2">
-              Ship To Group List
-            </Typography>
+      <div className="ship-to-group-editor">
+        <Slide
+          direction="right"
+          in={mode === EditorMode.ShipToGroup}
+          mountOnEnter
+          unmountOnExit
+        >
+          <Paper elevation={3} sx={{ p: 3 }} className="paper">
+            <Grid container spacing={2}>
+              <Grid item sm={6} textAlign={"start"}>
+                <Typography variant="h6" component="h2">
+                  Ship To Group List
+                </Typography>
+              </Grid>
+              <Grid item sm={6} textAlign={"end"}>
+                <IconButton
+                  aria-label="close"
+                  size="small"
+                  onClick={handleCloseEditor}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+
             <TableContainer
               component={Paper}
               sx={{ height: "calc(100% - 30px)" }}
@@ -103,9 +112,9 @@ export default function ShipToGroupDialog({ open, onClose }) {
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
-        </Fade>
-      </Modal>
+          </Paper>
+        </Slide>
+      </div>
     </Fragment>
   );
 }

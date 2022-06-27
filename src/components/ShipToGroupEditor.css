@@ -1,0 +1,14 @@
+.ship-to-group-editor {
+    position: fixed;
+    left: 10px;
+    top: 90px;
+    max-width: 450px;
+    max-height: calc(100vh - 130px);
+    opacity: 0.5;
+    overflow: auto;
+  }
+  
+  .ship-to-group-editor:hover {
+    opacity: 0.9;
+  }
+  

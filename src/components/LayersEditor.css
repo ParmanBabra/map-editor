@@ -3,7 +3,9 @@
   left: 10px;
   top: 90px;
   max-width: 350px;
+  max-height: calc(100vh - 130px);
   opacity: 0.5;
+  overflow: auto;
 }
 
 .layers-editor:hover {

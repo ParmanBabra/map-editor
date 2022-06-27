@@ -36,7 +36,6 @@ import selectFiles from "select-files";
 
 import LoadLocalDialog from "./LoadLocalDialog";
 import ExportDialog from "./ExportDialog";
-import ShipToGroupDialog from "./ShipToGroupDialog";
 
 export default function ToolsBar(props) {
   const map = useSelector((state) => state.mapManagement.map);
@@ -49,18 +48,8 @@ export default function ToolsBar(props) {
   const [openExport, setOpenExport] = useState(false);
   const [exportSQLs, setExportSQLs] = useState([]);
   const [openLoad, setOpenLoad] = useState(false);
-  const [openShipToGroup, setOpenShipToGroup] = useState(false);
 
   const dispatch = useDispatch();
-
-  const handleCloseShipToGroup = (e) => {
-    setOpenShipToGroup(false);
-  };
-
-  const handleOpenShipToGroup = (e) => {
-    setAnchorElMap(null);
-    setOpenShipToGroup(true);
-  };
 
   const handleOpenNavFile = (event) => {
     setAnchorElFile(event.currentTarget);
@@ -269,19 +258,6 @@ export default function ToolsBar(props) {
             >
               <MenuItem
                 onClick={(e) => {
-                  handleCloseNavMap();
-                  dispatch(selectMap());
-                }}
-              >
-                Map Information
-              </MenuItem>
-
-              <MenuItem onClick={(e) => handleOpenShipToGroup()}>
-                Ship To Groups
-              </MenuItem>
-              <Divider light />
-              <MenuItem
-                onClick={(e) => {
                   handleUpdateMap(!map.showGrid, "showGrid");
                 }}
               >
@@ -407,6 +383,23 @@ export default function ToolsBar(props) {
               <MenuItem
                 onClick={(e) => {
                   handleCloseNavEditor();
+                  dispatch(changeEditorMode(EditorMode.Map));
+                }}
+              >
+                Map Information
+              </MenuItem>
+
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseNavEditor();
+                  dispatch(changeEditorMode(EditorMode.ShipToGroup));
+                }}
+              >
+                Ship To Groups
+              </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseNavEditor();
                   dispatch(changeEditorMode(EditorMode.Layers));
                 }}
               >
@@ -432,11 +425,6 @@ export default function ToolsBar(props) {
         exportSQLs={exportSQLs}
       />
       <LoadLocalDialog open={openLoad} onClose={handleCloseLoad} />
-
-      <ShipToGroupDialog
-        open={openShipToGroup}
-        onClose={handleCloseShipToGroup}
-      />
     </AppBar>
   );
 }
