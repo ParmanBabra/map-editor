@@ -5,7 +5,6 @@ import Paper from "@mui/material/Paper";
 import Slide from "@mui/material/Slide";
 
 import CommonProp from "./CommonProp";
-import MapProp from "./MapProp";
 import ZoneProp from "./ZoneProp";
 import LaneProp from "./LaneProp";
 
@@ -15,10 +14,8 @@ export default function PropertyEditor(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
-  const map = useSelector((state) => state.mapManagement.map);
-  const defaultValues = useSelector((state) => state.mapManagement.default);
+
   const selections = useSelector((state) => state.selection.selections);
-  const isMap = useSelector((state) => state.selection.isMap);
 
   let selecting = null;
   let type = null;
@@ -43,11 +40,7 @@ export default function PropertyEditor(props) {
     }
   }
 
-  function renderProps(showMap, selection) {
-    if (showMap) {
-      return <MapProp map={map} defaultValus={defaultValues} />;
-    }
-
+  function renderProps(selection) {
     if (selection) {
       return (
         <Fragment>
@@ -58,7 +51,7 @@ export default function PropertyEditor(props) {
     }
   }
 
-  if (!selecting && !isMap) {
+  if (!selecting) {
     return <Fragment></Fragment>;
   }
 
@@ -66,7 +59,7 @@ export default function PropertyEditor(props) {
     <div className="editor">
       <Slide direction="left" in={true} mountOnEnter unmountOnExit>
         <Paper elevation={3} sx={{ p: 3 }} className="paper">
-          {renderProps(isMap, selecting)}
+          {renderProps(selecting)}
         </Paper>
       </Slide>
     </div>
