@@ -684,6 +684,33 @@ export const mapManagementSlice = createSlice({
         };
       }
     },
+    fillZone: (state, action) => {
+      let zone = state.zones[action.payload];
+      let max = { x: 0, y: 0 };
+      let min = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+      let hasLane = false;
+      for (const key in state.lanes) {
+        if (Object.hasOwnProperty.call(state.lanes, key)) {
+          const lane = state.lanes[key];
+
+          if (lane.zone_id !== zone.id) continue;
+
+          hasLane = true;
+          min.x = Math.min(lane.x, min.x);
+          min.y = Math.min(lane.y, min.y);
+          max.x = Math.max(lane.x + lane.width, max.x);
+          max.y = Math.max(lane.y + lane.height, max.y);
+        }
+      }
+
+      if (!hasLane) return;
+
+      state.zones[action.payload].x = min.x;
+      state.zones[action.payload].y = min.y;
+
+      state.zones[action.payload].width = max.x - min.x;
+      state.zones[action.payload].height = max.y - min.y;
+    },
   },
   extraReducers: (builder) => {
     // Add reducers for additional action types here, and handle loading state as needed
@@ -978,6 +1005,7 @@ export const {
   toggleLayerVisible,
   toggleLayerEditable,
   addLayer,
+  fillZone,
 } = mapManagementSlice.actions;
 
 export default mapManagementSlice.reducer;

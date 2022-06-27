@@ -26,6 +26,7 @@ import {
   progressAdjust,
   updateLanesOfZone,
   pasteZoneProperties,
+  fillZone,
 } from "./../reducers/map-management";
 import { copyZoneProperties } from "./../reducers/selection";
 import { ContentType } from "./../helper/constants";
@@ -395,6 +396,11 @@ export default function ZoneProp(props) {
           onClick={() => dispatch(updateLanesOfZone(zone.id))}
         >
           Update Lane
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button variant="contained" onClick={() => dispatch(fillZone(zone.id))}>
+          Fill Zone
         </Button>
       </Grid>
       {zone.localtionType === "storage" ? (
