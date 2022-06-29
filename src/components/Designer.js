@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import _ from "lodash";
 import { useSelector, useDispatch } from "react-redux";
-import { TransformWrapper, TransformComponent } from "@kokarn/react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+} from "@kokarn/react-zoom-pan-pinch";
 
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
@@ -170,7 +173,7 @@ export default function Designer(props) {
         let markers = selections
           .filter((x) => x.type === "marker")
           .map((x) => x.id);
-          
+
         dispatch(deleteZones(zones));
         dispatch(deleteLanes(lanes));
         dispatch(deleteSlots(slots));

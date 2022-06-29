@@ -436,7 +436,6 @@ export default function MapEditor(props) {
                   value={currentServer}
                   onChange={(e) => {
                     dispatch(updateServer(e.target.value));
-                    // updateStringProp(e.target.value, "localtionType")
                   }}
                 >
                   {_.values(servers).map((server) => {
