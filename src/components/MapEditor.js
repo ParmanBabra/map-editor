@@ -24,7 +24,7 @@ import { changeEditorMode } from "../reducers/selection";
 import "./MapEditor.css";
 import _ from "lodash";
 
-export default function MapProp(props) {
+export default function MapEditor(props) {
   const map = useSelector((state) => state.mapManagement.map);
   const defaultValues = useSelector((state) => state.mapManagement.default);
   const { servers, currentServer } = useSelector((state) => state.marker);
@@ -440,7 +440,11 @@ export default function MapProp(props) {
                   }}
                 >
                   {_.values(servers).map((server) => {
-                    return <MenuItem value={server.key}>{server.key}</MenuItem>;
+                    return (
+                      <MenuItem key={server.key} value={server.key}>
+                        {server.key}
+                      </MenuItem>
+                    );
                   })}
                 </Select>
               </FormControl>

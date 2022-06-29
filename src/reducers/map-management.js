@@ -187,7 +187,7 @@ const _updateLanesOfZone = (zone_id, state) => {
   let collisionLane = [];
 
   for (const laneInfo of lanesInZone) {
-    if (laneInfo.percentOverlap < 0.9) continue;
+    if (laneInfo.percentOverlap < 0.1) continue;
 
     let lane = state.lanes[laneInfo.id];
     collisionLane.push(lane);
@@ -346,11 +346,13 @@ export const mapManagementSlice = createSlice({
       zones = collisionBox(lane, zones);
 
       if (zones.length > 0) {
-        let zone = _.orderBy(zones, (x) => x.area, "desc")[0];
-        lane.zone_id = zone.id;
+        let zoneArea = _.orderBy(zones, (x) => x.area, "desc")[0];
+        let zone = state.zones[zoneArea.id];
+        lane.zone_id = zoneArea.id;
+        // state.lanes[action.payload] = lane;
 
         let lanesInZone = _.values(state.lanes).filter(
-          (x) => zone.id === x.zone_id
+          (x) => zoneArea.id === x.zone_id
         );
 
         if (zone.laneDirection === "Vertical") {
