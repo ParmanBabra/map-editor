@@ -10,11 +10,11 @@ function convertOriginXToBottomLeft(y, height, mapHeight) {
   return [newY, newYBottomLeft];
 }
 
-function convertOriginYToOnboardY(y, mapHeight) {
+export const convertOriginYToOnboardY = (y, mapHeight) => {
   let newY = Math.abs(y - mapHeight);
 
   return [newY];
-}
+};
 
 export const exportTemplateSlot = (template_slots, template_zones, map) => {
   let sqlSlots = [];

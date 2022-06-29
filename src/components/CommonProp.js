@@ -59,15 +59,18 @@ export default function CommonProp(props) {
           Geometry Property
         </Typography>
       </Grid>
-      <Grid item sm={12}>
-        <TextField
-          label="Name"
-          fullWidth
-          size="small"
-          value={element.name}
-          onChange={(e) => updatePropString(e.target.value, "name")}
-        />
-      </Grid>
+      {element.name ? (
+        <Grid item sm={12}>
+          <TextField
+            label="Name"
+            fullWidth
+            size="small"
+            value={element.name}
+            onChange={(e) => updatePropString(e.target.value, "name")}
+          />
+        </Grid>
+      ) : null}
+
       <Grid item xs={12} sm={6}>
         <TextField
           label="X"
@@ -86,24 +89,28 @@ export default function CommonProp(props) {
           onChange={(e) => updateProp(e.target.value, "y")}
         />
       </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          label="Width"
-          fullWidth
-          size="small"
-          value={element.width}
-          onChange={(e) => updateProp(e.target.value, "width")}
-        />
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          label="Height"
-          fullWidth
-          size="small"
-          value={element.height}
-          onChange={(e) => updateProp(e.target.value, "height")}
-        />
-      </Grid>
+      {element.width ? (
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Width"
+            fullWidth
+            size="small"
+            value={element.width}
+            onChange={(e) => updateProp(e.target.value, "width")}
+          />
+        </Grid>
+      ) : null}
+      {element.height ? (
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Height"
+            fullWidth
+            size="small"
+            value={element.height}
+            onChange={(e) => updateProp(e.target.value, "height")}
+          />
+        </Grid>
+      ) : null}
     </Grid>
   );
 }

@@ -246,7 +246,7 @@ export default function Lane(props) {
   return (
     <Rnd
       disableDragging={map.freezingLane || map.disableMove}
-      enableResizing={!map.freezingLane || map.disableMove}
+      enableResizing={!map.freezingZone && !map.disableMove}
       className={classnames(classStyle)}
       style={{
         borderWidth: `${borderWidth}px`,

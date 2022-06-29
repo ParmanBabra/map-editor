@@ -144,7 +144,7 @@ export default function Slot(props) {
   return (
     <Rnd
       disableDragging={map.freezingSlot || map.disableMove}
-      enableResizing={!map.freezingSlot || map.disableMove}
+      enableResizing={!map.freezingZone && !map.disableMove}
       className={classnames(classStyle)}
       bounds=".content"
       style={{

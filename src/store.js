@@ -6,6 +6,7 @@ import selectionReducer from "./reducers/selection";
 import keyboardReducer from "./reducers/keyboard-management";
 import shipToGroupsReducer from "./reducers/ship-to-group-management";
 import mergeToolReducer from "./reducers/merge-tool";
+import markerReducer from "./reducers/marker";
 
 export default configureStore({
   reducer: {
@@ -15,5 +16,6 @@ export default configureStore({
     keyboard: keyboardReducer,
     shipToGroupsManagement: shipToGroupsReducer,
     mergeTool: mergeToolReducer,
+    marker: markerReducer,
   },
 });

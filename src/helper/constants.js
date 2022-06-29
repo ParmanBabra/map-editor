@@ -82,6 +82,22 @@ export const defaultSlot = {
   layer: 1,
 };
 
+export const defaultMarker = {
+  key: null,
+  x: 0,
+  y: 0,
+  type: "marker",
+  z: 0,
+  product_id: "00445405.01",
+  forklift_name: "01",
+  // OnBoardLocationX: () => {
+  //   return this.x;
+  // },
+  // OnBoardLocationY: () => {
+  //   return this.y;
+  // },
+};
+
 export const defaultLayer = {
   key: null,
   name: null,

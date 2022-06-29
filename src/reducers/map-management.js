@@ -270,6 +270,7 @@ export const mapManagementSlice = createSlice({
       id: "A",
       name: "A",
       warehouseId: 2,
+      apiKey: "API-KEY",
       zoneRunning: 3,
       layerRunning: 1,
       snapGrid: [10, 10],

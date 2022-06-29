@@ -7,6 +7,7 @@ import Slide from "@mui/material/Slide";
 import CommonProp from "./CommonProp";
 import ZoneProp from "./ZoneProp";
 import LaneProp from "./LaneProp";
+import MarkerProp from "./MarkerProp";
 
 import "./PropertyEditor.css";
 
@@ -14,6 +15,7 @@ export default function PropertyEditor(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
+  const markers = useSelector((state) => state.marker.markers);
   const selections = useSelector((state) => state.selection.selections);
 
   let selecting = null;
@@ -28,6 +30,8 @@ export default function PropertyEditor(props) {
       selecting = lanes[selections[0].id];
     } else if (type === "slot") {
       selecting = slots[selections[0].id];
+    } else if (type === "marker") {
+      selecting = markers[selections[0].id];
     }
   }
 
@@ -36,6 +40,8 @@ export default function PropertyEditor(props) {
       return <ZoneProp selecting={selecting} />;
     } else if (type === "lane") {
       return <LaneProp selecting={selecting} />;
+    } else if (type === "marker") {
+      return <MarkerProp selecting={selecting} />;
     }
   }
 

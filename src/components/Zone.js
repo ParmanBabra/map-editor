@@ -337,12 +337,11 @@ export default function Zone(props) {
   return (
     <Rnd
       disableDragging={map.freezingZone || map.disableMove}
-      enableResizing={!map.freezingZone || map.disableMove}
+      enableResizing={!map.freezingZone && !map.disableMove}
       className={classnames(classStyle)}
       style={{
         borderWidth: `${borderWidth}px`,
         backgroundColor: map.showZoneRealColor ? `${zone.color}` : `#FFFFFF96`,
-
         opacity: layer.opacity
       }}
       bounds=".content"

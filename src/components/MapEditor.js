@@ -8,19 +8,26 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 import { useDispatch, useSelector } from "react-redux";
 
 import { updateMap, updateDefault } from "../reducers/map-management";
+import { updateServer } from "../reducers/marker";
 
 import { EditorMode } from "../helper/constants";
 import { changeEditorMode } from "../reducers/selection";
 
 import "./MapEditor.css";
+import _ from "lodash";
 
 export default function MapProp(props) {
   const map = useSelector((state) => state.mapManagement.map);
   const defaultValues = useSelector((state) => state.mapManagement.default);
+  const { servers, currentServer } = useSelector((state) => state.marker);
 
   const dispatch = useDispatch();
 
@@ -413,6 +420,30 @@ export default function MapProp(props) {
                   updateDefaultPropNumber(e.target.value, "slotWidth")
                 }
               />
+            </Grid>
+            <Grid item xs={12} sm={12} textAlign={"start"}>
+              <Typography variant="h5" component="h5">
+                API Property
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Server</InputLabel>
+                <Select
+                  fullWidth
+                  size="small"
+                  label="Server"
+                  value={currentServer}
+                  onChange={(e) => {
+                    dispatch(updateServer(e.target.value));
+                    // updateStringProp(e.target.value, "localtionType")
+                  }}
+                >
+                  {_.values(servers).map((server) => {
+                    return <MenuItem value={server.key}>{server.key}</MenuItem>;
+                  })}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </Paper>

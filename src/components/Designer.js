@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import _ from "lodash";
 import { useSelector, useDispatch } from "react-redux";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent } from "@kokarn/react-zoom-pan-pinch";
 
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
@@ -16,6 +16,8 @@ import {
   deleteSlots,
   addZoneWithSelections,
 } from "./../reducers/map-management";
+
+import { addMarker, deleteMarkers } from "./../reducers/marker";
 import {
   clear,
   selectWithRect,
@@ -27,12 +29,14 @@ import "./Designer.css";
 import Zone from "./Zone";
 import Lane from "./Lane";
 import Slot from "./Slot";
+import Marker from "./Marker";
 
 export default function Designer(props) {
   const zones = useSelector((state) => state.mapManagement.zones);
   const lanes = useSelector((state) => state.mapManagement.lanes);
   const slots = useSelector((state) => state.mapManagement.slots);
   const layers = useSelector((state) => state.mapManagement.layers);
+  const markers = useSelector((state) => state.marker.markers);
   const map = useSelector((state) => state.mapManagement.map);
   const keys = useSelector((state) => state.keyboard.keys);
   const mouse = useSelector((state) => state.keyboard.mouse);
@@ -63,6 +67,10 @@ export default function Designer(props) {
 
   function handleAddLane() {
     dispatch(addLane({ currentLayer }));
+  }
+
+  function handleAddMarker() {
+    dispatch(addMarker());
   }
 
   function handleGroupZone() {
@@ -132,6 +140,18 @@ export default function Designer(props) {
     });
   }
 
+  function renderMarkers(markers, map) {
+    return _.map(markers, (marker) => {
+      return (
+        <Marker
+          key={marker.key}
+          marker={marker}
+          scale={zoomInformation.scale}
+        ></Marker>
+      );
+    });
+  }
+
   useEffect(() => {
     if (keys["Delete"]) {
       if (selections.length > 0) {
@@ -147,9 +167,14 @@ export default function Designer(props) {
           .filter((x) => x.type === "slot")
           .map((x) => x.id);
 
+        let markers = selections
+          .filter((x) => x.type === "marker")
+          .map((x) => x.id);
+          
         dispatch(deleteZones(zones));
         dispatch(deleteLanes(lanes));
         dispatch(deleteSlots(slots));
+        dispatch(deleteMarkers(markers));
 
         dispatch(clear());
       }
@@ -205,6 +230,8 @@ export default function Designer(props) {
 
           {renderSlots(slots, layers, map)}
 
+          {renderMarkers(markers, map)}
+
           <h1 className="map-name">Map : {map.name}</h1>
         </TransformComponent>
       </TransformWrapper>
@@ -233,6 +260,12 @@ export default function Designer(props) {
         />
 
         <SpeedDialAction icon={<AddIcon />} tooltipTitle="Add Slot" />
+
+        <SpeedDialAction
+          icon={<AddIcon />}
+          tooltipTitle="Add Marker"
+          onClick={(e) => handleAddMarker()}
+        />
       </SpeedDial>
     </div>
   );

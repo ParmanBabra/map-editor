@@ -228,13 +228,13 @@ export default function ToolsBar(props) {
               <MenuItem onClick={(e) => handleClickLoadJson()}>
                 Load Json
               </MenuItem>
+              <Divider light />
               <MenuItem onClick={(e) => handleClickLoadLanes()}>
-                Load Lanes CSV
+                Import Lanes CSV
               </MenuItem>
               <MenuItem onClick={(e) => handleClickLoadShipToGroups()}>
-                Load Ship To Group CSV
+                Import Ship To Group CSV
               </MenuItem>
-              <Divider light />
               <MenuItem onClick={handleClickExport}>Export SQL</MenuItem>
               <MenuItem onClick={handleClickShipToGroupExport}>
                 Export Ship To Group SQL
