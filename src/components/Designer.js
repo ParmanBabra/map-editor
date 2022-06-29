@@ -210,6 +210,7 @@ export default function Designer(props) {
           });
         }}
       >
+        
         <TransformComponent
           wrapperClass="wrapper"
           contentClass="content"
